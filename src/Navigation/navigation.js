@@ -8,7 +8,10 @@ const Stack = createNativeStackNavigator()
 function Navigator () {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{headerShown: false}}
+        initialRouteName='Scanner'
+      >
         <Stack.Screen name='Scanner' component={Scanner} />
         <Stack.Screen name='Result' component={Result} />
       </Stack.Navigator>
