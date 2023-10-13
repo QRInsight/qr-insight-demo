@@ -8,8 +8,6 @@ const Result = ({route}) => {
   const id = route?.params?.id || '1182061'
   const isFocused = useIsFocused()
   const navigation = useNavigation()
-  console.log('id-->', id)
-  console.log('route-->', route)
 
   const [loading, setLoading] = useState(true)
   const [records, setRecords] = useState([])
@@ -105,10 +103,15 @@ const Result = ({route}) => {
   const getQrInfo = async () => {
     try {
       const qrInfo = await fetchDataById(id)
-      setRecords(transformData(qrInfo?.records))
-      setLoading(false)
+      console.log('qrInfo-->', qrInfo)
+      if (qrInfo?.records) {
+        const data = transformData(qrInfo?.records)
+        const sorted = data?.sort(customSort)
+        setRecords(sorted)
+        setLoading(false)
+      }
     } catch (err) {
-      // console.log('err--->', err)
+      console.log('err--->', err)
       setApiError(true)
       setLoading(false)
       navigation.goBack()
@@ -171,6 +174,34 @@ const Result = ({route}) => {
       </View>
     )
   }
+
+  const customSort = (a, b) => {
+    // Convert the date strings to Date objects for comparison
+    const dateA = new Date(a.movementDate)
+    const dateB = new Date(b.movementDate)
+
+    // Compare dates
+    if (dateA > dateB) {
+      return 1 // 'a' comes after 'b'
+    } else if (dateA < dateB) {
+      return -1 // 'a' comes before 'b'
+    } else {
+      // Dates are the same, so compare movement types
+      const typeOrder = {
+        'Vendor Receipts': 1,
+        'Movement From': 2,
+        'Movement To': 3,
+        'Customer Shipment': 4,
+      }
+
+      const typeA = typeOrder[a.movementType]
+      const typeB = typeOrder[b.movementType]
+
+      return typeA - typeB
+    }
+  }
+
+  console.log('records-->', records)
 
   return (
     <View

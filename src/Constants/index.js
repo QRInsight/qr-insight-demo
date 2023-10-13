@@ -3,13 +3,15 @@ import RNFetchBlob from 'rn-fetch-blob'
 import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage'
 // import {fetch} from 'react-native-ssl-pinning'
 
-export const baseUrl = 'https://202.163.101.237:4443'
 export const username = 'SuperUser'
 export const password = 'System'
 
 export async function authenticateUser () {
   try {
-    const baseUrl = 'https://202.163.101.237:4443' // Replace with your actual base URL
+    const protocol = await getValueFromStorage('protocol')
+    const port = await getValueFromStorage('port')
+    const host = await getValueFromStorage('host')
+    const baseUrl = `${protocol}://${host}:${port}` // Replace with your actual base URL
     const requestBody = JSON.stringify({
       userName: 'SuperUser', // Replace with your username
       password: 'System', // Replace with your password
@@ -39,6 +41,10 @@ export async function authenticateUser () {
 
 export async function updateToken (authToken) {
   try {
+    const protocol = await getValueFromStorage('protocol')
+    const port = await getValueFromStorage('port')
+    const host = await getValueFromStorage('host')
+    const baseUrl = `${protocol}://${host}:${port}`
     const putUrl = `${baseUrl}/api/v1/auth/tokens`
 
     const requestBody = JSON.stringify({
@@ -75,6 +81,10 @@ export async function updateToken (authToken) {
 
 export async function fetchDataById (id = 1182061) {
   try {
+    const protocol = await getValueFromStorage('protocol')
+    const port = await getValueFromStorage('port')
+    const host = await getValueFromStorage('host')
+    const baseUrl = `${protocol}://${host}:${port}`
     const getUrl = `${baseUrl}/api/v1/models/m_transaction?$filter=M_AttributeSetInstance_ID eq ${id}`
     const authToken = await getValueFromStorage('token')
     const response = await RNFetchBlob.config({
