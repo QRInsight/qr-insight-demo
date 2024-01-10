@@ -22,11 +22,10 @@ class Scanner extends Component {
   }
 
   componentDidMount () {
-    authenticateUser()
+    // authenticateUser()
   }
   onSuccess = e => {
-    console.log('scanned data---> ' + e.data)
-    this.props.navigation.navigate('Result', {id: e.data})
+    this.props.navigation.navigate('ResultAsset', {id: e.data})
     this.setState({
       result: e,
     })

@@ -1,7 +1,12 @@
 import axios from 'axios'
-import RNFetchBlob from 'rn-fetch-blob'
+// import RNFetchBlob from 'rn-fetch-blob'
 import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage'
 // import {fetch} from 'react-native-ssl-pinning'
+
+export const COLORS = {
+  orange: '#FF5D22',
+  teal: '#04608E',
+}
 
 export const username = 'SuperUser'
 export const password = 'System'
@@ -79,23 +84,25 @@ export async function updateToken (authToken) {
   }
 }
 
-export async function fetchDataById (id = 1182061) {
+export async function fetchDataByCode (id = 'EL-f9a1c2') {
   try {
-    const protocol = await getValueFromStorage('protocol')
-    const port = await getValueFromStorage('port')
-    const host = await getValueFromStorage('host')
-    const baseUrl = `${protocol}://${host}:${port}`
-    const getUrl = `${baseUrl}/api/v1/models/m_transaction?$filter=M_AttributeSetInstance_ID eq ${id}`
+    const getUrl = `https://count-assets.de.r.appspot.com/api/assetsByCode/${id}`
     const authToken = await getValueFromStorage('token')
-    const response = await RNFetchBlob.config({
-      trusty: true, // Disable SSL certificate verification (use with caution)
-    }).fetch('GET', getUrl, {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${authToken}`,
+
+    const response = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`, // Include your authorization header here
+      },
     })
 
-    const data = response.json()
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('data-->', data)
 
     return data
 
@@ -103,5 +110,59 @@ export async function fetchDataById (id = 1182061) {
   } catch (error) {
     console.error('An error occurred:', error)
     return error
+  }
+}
+
+export async function fetchAssetHistory (id = '659c08957c9c59225c29d1cb') {
+  try {
+    const getUrl = `https://count-assets.de.r.appspot.com/api/transactions/${id}`
+    const authToken = await getValueFromStorage('token')
+
+    const response = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`, // Include your authorization header here
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('history of asset-->', data)
+
+    return data
+
+    // You can use 'data' for further processing or rendering in your React Native component
+  } catch (error) {
+    console.error('An error occurred:', error)
+    return error
+  }
+}
+
+export async function login (obj) {
+  try {
+    const baseUrl = `https://count-assets.de.r.appspot.com/api/login` // Replace with your actual base URL
+    const requestBody = JSON.stringify(obj)
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: requestBody,
+    })
+
+    const data = await response.json()
+    console.log('data-->', data)
+
+    return data?.data
+    // You can use 'data' for further processing or rendering in your React Native component
+    // await updateToken(data?.token);
+  } catch (error) {
+    console.error('An error occurred:', error)
   }
 }

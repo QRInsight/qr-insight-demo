@@ -10,22 +10,22 @@ import {
 } from 'react-native'
 import {addKeyToStorage, getValueFromStorage} from '../../helpers/asyncStorage'
 import {useIsFocused, useNavigation} from '@react-navigation/native'
-import {authenticateUser} from '../../Constants'
+import {COLORS, authenticateUser} from '../../Constants'
 
 const DeviceInput = () => {
   const navigation = useNavigation()
   const isFocused = useIsFocused()
-  const [id, setId] = useState('1182061')
+  const [id, setId] = useState('EL-f9a1c2')
 
   const seeResult = async () => {
     if (id) {
-      navigation.navigate('Result', {id})
+      navigation.navigate('ResultAsset', {id})
     }
   }
 
-  useEffect(() => {
-    authenticateUser()
-  }, [])
+  // useEffect(() => {
+  //   authenticateUser()
+  // }, [])
 
   return (
     <SafeAreaView>
@@ -38,25 +38,25 @@ const DeviceInput = () => {
           marginVertical: '10%',
         }}
       >
-        Scan With Bluetooth Device
+        Add Asset Code
       </Text>
-        <Text style={styles.label}>Scan Id</Text>
-        <TextInput
-          autoFocus={true}
-          style={styles.input}
-          value={id}
-          onChangeText={setId}
-          onSubmitEditing={seeResult}
-        />
-        <View style={{marginVertical: 12}} />
-        <TouchableOpacity
-          onPress={seeResult}
-          style={styles.btn}
-          disabled={id === ''}
-          activeOpacity={1.0}
-        >
-          <Text style={styles.btnLable}>See Result</Text>
-        </TouchableOpacity>
+      <Text style={styles.label}>Asset Code</Text>
+      <TextInput
+        autoFocus={true}
+        style={styles.input}
+        value={id}
+        onChangeText={setId}
+        onSubmitEditing={seeResult}
+      />
+      <View style={{marginVertical: 12}} />
+      <TouchableOpacity
+        onPress={seeResult}
+        style={styles.btn}
+        disabled={id === ''}
+        activeOpacity={1.0}
+      >
+        <Text style={styles.btnLable}>See Result</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   btn: {
-    backgroundColor: '#2980b9',
+    backgroundColor: COLORS.teal,
     height: 41,
     marginHorizontal: 12,
     flexDirection: 'row',
