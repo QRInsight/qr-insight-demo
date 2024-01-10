@@ -42,6 +42,13 @@ const ChooseScanType = () => {
       >
         <Text style={styles.btnLable}>Scan By Camera</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('OfficeLocations')}
+        style={styles.btn}
+        activeOpacity={1.0}
+      >
+        <Text style={styles.btnLable}>Audit Assets</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }

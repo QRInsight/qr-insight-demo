@@ -22,13 +22,18 @@ class Scanner extends Component {
   }
 
   componentDidMount () {
+    console.log('this.props.navigation.params---->', this.props.route.params)
     // authenticateUser()
   }
   onSuccess = e => {
-    this.props.navigation.navigate('ResultAsset', {id: e.data})
-    this.setState({
-      result: e,
-    })
+    if (this.props.route.params?.forVerification) {
+      this.props.navigation.navigate('OfficeLocationsAssets', {assetCode: e.data})
+    } else {
+      this.props.navigation.navigate('ResultAsset', {id: e.data})
+      this.setState({
+        result: e,
+      })
+    }
   }
   activeQR = () => {
     this.setState({scan: true})

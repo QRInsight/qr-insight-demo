@@ -113,6 +113,66 @@ export async function fetchDataByCode (id = 'EL-f9a1c2') {
   }
 }
 
+export async function fetchLocations () {
+  try {
+    const getUrl = `https://count-assets.de.r.appspot.com/api/locations`
+    const authToken = await getValueFromStorage('token')
+
+    const response = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`, // Include your authorization header here
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('data-->', data)
+
+    return data
+
+    // You can use 'data' for further processing or rendering in your React Native component
+  } catch (error) {
+    console.error('An error occurred:', error)
+    return error
+  }
+}
+export async function fetchAssetsByLocations (
+  location = '659c07527c9c59225c29d1ac',
+) {
+  console.log(location)
+  try {
+    const getUrl = `https://count-assets.de.r.appspot.com/api/assets/ByLocation/${location}`
+    const authToken = await getValueFromStorage('token')
+
+    const response = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`, // Include your authorization header here
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('data-->', data)
+
+    return data
+
+    // You can use 'data' for further processing or rendering in your React Native component
+  } catch (error) {
+    console.error('An error occurred:', error)
+    return error
+  }
+}
+
 export async function fetchAssetHistory (id = '659c08957c9c59225c29d1cb') {
   try {
     const getUrl = `https://count-assets.de.r.appspot.com/api/transactions/${id}`

@@ -10,6 +10,8 @@ import ChooseScanType from '../Screens/ChooseScanType'
 import DeviceInput from '../Screens/DeviceInput'
 import Login from '../Screens/Login'
 import ResultAsset from '../Screens/Result-Asset'
+import OfficeLocations from '../Screens/Locations'
+import OfficeLocationsAssets from '../Screens/LocationsAssets'
 
 const Stack = createNativeStackNavigator()
 
@@ -48,6 +50,9 @@ function Navigator () {
         <Stack.Screen name='Login' component={Login} />
         {/* <Stack.Screen name='UpdateInfo' component={UpdateInfo} /> */}
         <Stack.Screen name='ChooseScanType' component={ChooseScanType} />
+        <Stack.Screen name='OfficeLocations' component={OfficeLocations} />
+        <Stack.Screen name='OfficeLocationsAssets' component={OfficeLocationsAssets} />
+
         <Stack.Screen name='ResultAsset' component={ResultAsset} />
         <Stack.Screen name='DeviceInput' component={DeviceInput} />
         <Stack.Screen name='Scanner' component={Scanner} />

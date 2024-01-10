@@ -18,7 +18,6 @@ import {
   fetchDataById,
 } from '../../Constants'
 import {useIsFocused, useNavigation} from '@react-navigation/native'
-import {SvgXml} from 'react-native-svg'
 
 const Row = ({title, description}) => {
   return (
@@ -51,7 +50,7 @@ const ResultAsset = ({route}) => {
   const isFocused = useIsFocused()
   const navigation = useNavigation()
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true)  
   const [records, setRecords] = useState([])
   const [assetInfo, setAssetInfo] = useState({})
   const [transactions, setTransactions] = useState({})
