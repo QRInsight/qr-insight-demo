@@ -24,14 +24,14 @@ const UpdateInfo = () => {
   const getInfo = async () => {
     setPort(await getValueFromStorage('port'))
     setHost(await getValueFromStorage('host'))
-    setProtocol(await getValueFromStorage('protocol'))
+    // setProtocol(await getValueFromStorage('protocol'))
   }
 
   const updateCredentials = async () => {
     await addKeyToStorage('port', port)
     await addKeyToStorage('host', host)
     await addKeyToStorage('protocol', protocol)
-    navigation.navigate('ChooseScanType')
+    // navigation.navigate('ChooseScanType')
   }
   return (
     <SafeAreaView>
