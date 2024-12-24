@@ -5728,10 +5728,10 @@ react-native-screens@^3.25.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
-react-native-ssl-pinning@^1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/react-native-ssl-pinning/-/react-native-ssl-pinning-1.5.7.tgz#2d9af23ca9b41adeae3ee4cd14751df41da2cbea"
-  integrity sha512-lDdd9uXTPfglUGew4hASaqsWYbPDl0mJ16EU7CLRM0hfdam/lQhVJsv/fIWgz0/8ydHMMy73HbooSPsFZNHVPw==
+react-native-ssl-pinning@^1.5.8:
+  version "1.5.8"
+  resolved "https://registry.yarnpkg.com/react-native-ssl-pinning/-/react-native-ssl-pinning-1.5.8.tgz#0016f07e7597d8947ee9bb97b15ea640a07faecf"
+  integrity sha512-ZcQEYCf/qBKIPUqxAvHkEAJ9kgr8bIC8oT/LczI41jKaYcovjtiWCGpw3zRvcM/RfiUhSI0edysad62OmHOomw==
   dependencies:
     q "^1.4.1"
 
