@@ -10,4 +10,5 @@ export const images = {
   asset_report: require('./images/report.png'),
   asset_transfer: require('./images/transfer.png'),
   asset_audit: require('./images/audit.png'),
+  camera: require('./images/camera.png'),
 };

@@ -1,18 +1,33 @@
 import React from 'react';
-import {StyleSheet, View, Image, Dimensions, FlatList} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  Dimensions,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
 import {COLORS, Space, TxtWeight} from '../../Constants';
 import Container from '../../components/Container';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
+import {useNavigation} from '@react-navigation/native';
 
-const Card = ({title = 'Asset Detail', image = images.asset_detail}) => {
+const Card = ({
+  title = 'Asset Detail',
+  onPress,
+  image = images.asset_detail,
+}) => {
   return (
-    <View style={styles.cardContainer}>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={styles.cardContainer}>
       <View style={styles.cardIconWrapper}>
         <Image source={image} style={styles.cardIcon} />
       </View>
       <Txt>{title}</Txt>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -41,6 +56,7 @@ const AssetCategoryTable = ({data}) => {
 };
 
 const Home = () => {
+  const navigation = useNavigation();
   const assetData = [
     {category: 'A', quantity: 30},
     {category: 'B', quantity: 20},
@@ -79,9 +95,13 @@ const Home = () => {
   ];
 
   return (
-    <Container showBottom={false}>
+    <Container 
+    showBottom={false}>
       <View style={styles.cardRow}>
-        <Card title="Asset Detail" />
+        <Card
+          title="Asset Detail"
+          onPress={() => navigation.navigate('AssetDetail')}
+        />
         <Card title="Asset Report" image={images.asset_report} />
       </View>
       <View style={styles.cardRow}>

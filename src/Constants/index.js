@@ -4,7 +4,7 @@ import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage';
 // import {fetch} from 'react-native-ssl-pinning'
 
 export const COLORS = {
-  bgGrey: ' #F2F2F2',
+  bgGrey: '#F2F2F2',
   theme: '#02618E',
   bgBlue: '#DFF1FF',
   white: '#fff',
@@ -39,87 +39,83 @@ export const Space = {
 export const username = 'SuperUser';
 export const password = 'System';
 
-export async function authenticateUser() {
-  try {
-    const protocol = await getValueFromStorage('protocol');
-    const port = await getValueFromStorage('port');
-    const host = await getValueFromStorage('host');
-    const baseUrl = `${protocol}://${host}:${port}`; // Replace with your actual base URL
-    const requestBody = JSON.stringify({
-      userName: 'SuperUser', // Replace with your username
-      password: 'System', // Replace with your password
-    });
+// Base URL Helper
+const getBaseUrl = async () => {
+  const protocol = await getValueFromStorage('protocol');
+  const port = await getValueFromStorage('port');
+  const host = await getValueFromStorage('host');
+  return `${protocol}://${host}:${port}`;
+};
 
-    const response = await RNFetchBlob.config({
-      trusty: true, // Disable SSL certificate verification (use with caution)
-    }).fetch(
-      'POST',
-      `${baseUrl}/api/v1/auth/tokens`,
-      {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      requestBody,
-    );
+// Token Helper
+const getAuthToken = async () => {
+  return await getValueFromStorage('token');
+};
 
-    const data = response.json();
-    console.log('data-->', data?.token);
-    await updateToken(data?.token);
+// Authenticate User
+export async function authenticateUser(username, password) {
+  const protocol = await getValueFromStorage('protocol');
+  const port = await getValueFromStorage('port');
+  const host = await getValueFromStorage('host');
+  const baseUrl = `${port}://${host}:${protocol}`;
+  console.log('baseUrl==>', baseUrl);
 
-    // You can use 'data' for further processing or rendering in your React Native component
-  } catch (error) {
-    console.error('An error occurred:', error);
-  }
+  const requestBody = JSON.stringify({
+    userName: username,
+    password: password,
+  });
+
+  const response = await RNFetchBlob.config({trusty: true}).fetch(
+    'POST',
+    `${baseUrl}/api/v1/auth/tokens`,
+    {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    requestBody,
+  );
+
+  const data = await response.json();
+  return data?.token; // Return the token
 }
 
+// Update Token
 export async function updateToken(authToken) {
-  try {
-    const protocol = await getValueFromStorage('protocol');
-    const port = await getValueFromStorage('port');
-    const host = await getValueFromStorage('host');
-    const baseUrl = `${protocol}://${host}:${port}`;
-    const putUrl = `${baseUrl}/api/v1/auth/tokens`;
+  const protocol = await getValueFromStorage('protocol');
+  const port = await getValueFromStorage('port');
+  const host = await getValueFromStorage('host');
+  const baseUrl = `${port}://${host}:${protocol}`;
 
-    const requestBody = JSON.stringify({
-      clientId: 1000000,
-      roleId: 1000000,
-      organizationId: 1000000,
-      warehouseId: 1000000,
-      language: 'en_US',
-    });
+  const requestBody = JSON.stringify({
+    clientId: 1000002,
+    roleId: 1000016,
+    organizationId: 1000020,
+    warehouseId: 0,
+    language: 'en_Us',
+  });
 
-    const response = await RNFetchBlob.config({
-      trusty: true, // Disable SSL certificate verification (use with caution)
-    }).fetch(
-      'PUT',
-      putUrl,
-      {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-      requestBody,
-    );
+  const response = await RNFetchBlob.config({trusty: true}).fetch(
+    'PUT',
+    `${baseUrl}/api/v1/auth/tokens`,
+    {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+    requestBody,
+  );
 
-    console.log('Authentication Token--->', response);
-    const data = response.json();
-    await addKeyToStorage('token', data?.token);
-    // fetchDataById()
-
-    // You can use 'data' for further processing or rendering in your React Native component
-  } catch (error) {
-    console.error('An error occurred:', error);
-  }
+  const data = await response.json();
+  return data?.token; // Return the updated token
 }
 
+// Fetch Data by ID
 export async function fetchDataById(id = 1182061) {
   try {
-    const protocol = await getValueFromStorage('protocol');
-    const port = await getValueFromStorage('port');
-    const host = await getValueFromStorage('host');
-    const baseUrl = `${protocol}://${host}:${port}`;
+    const baseUrl = await getBaseUrl();
+    const authToken = await getAuthToken();
     const getUrl = `${baseUrl}/api/v1/models/m_transaction?$filter=M_AttributeSetInstance_ID eq ${id}`;
-    const authToken = await getValueFromStorage('token');
+
     const response = await RNFetchBlob.config({
       trusty: true, // Disable SSL certificate verification (use with caution)
     }).fetch('GET', getUrl, {
@@ -128,13 +124,12 @@ export async function fetchDataById(id = 1182061) {
       Authorization: `Bearer ${authToken}`,
     });
 
-    const data = response.json();
+    const data = await response.json();
+    console.log('Fetched Data:', data);
 
     return data;
-
-    // You can use 'data' for further processing or rendering in your React Native component
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.error('Error fetching data:', error);
     return error;
   }
 }

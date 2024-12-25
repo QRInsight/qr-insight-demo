@@ -1,4 +1,4 @@
-import React, {Component, Fragment, useEffect, useState} from 'react'
+import React, {Component, Fragment, useEffect, useState} from 'react';
 import {
   Text,
   SafeAreaView,
@@ -7,32 +7,33 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-} from 'react-native'
-import {addKeyToStorage, getValueFromStorage} from '../../helpers/asyncStorage'
-import {useNavigation} from '@react-navigation/native'
+} from 'react-native';
+import {addKeyToStorage, getValueFromStorage} from '../../helpers/asyncStorage';
+import {useNavigation} from '@react-navigation/native';
 
 const UpdateInfo = () => {
-  const navigation = useNavigation()
-  const [port, setPort] = useState('')
-  const [host, setHost] = useState('')
-  const [protocol, setProtocol] = useState('')
+  const navigation = useNavigation();
+  const [port, setPort] = useState('https');
+  const [host, setHost] = useState('bsmlive.erinsight.com');
+  const [protocol, setProtocol] = useState('2443');
 
   useEffect(() => {
-    getInfo()
-  }, [])
+    getInfo();
+  }, []);
 
   const getInfo = async () => {
-    setPort(await getValueFromStorage('port'))
-    setHost(await getValueFromStorage('host'))
-    // setProtocol(await getValueFromStorage('protocol'))
-  }
+    setPort(await getValueFromStorage('port'));
+    setHost(await getValueFromStorage('host'));
+    setProtocol(await getValueFromStorage('protocol'));
+  };
 
   const updateCredentials = async () => {
-    await addKeyToStorage('port', port)
-    await addKeyToStorage('host', host)
-    await addKeyToStorage('protocol', protocol)
-    // navigation.navigate('ChooseScanType')
-  }
+    console.log('port=>', port, host, protocol);
+    await addKeyToStorage('port', port);
+    await addKeyToStorage('host', host);
+    await addKeyToStorage('protocol', protocol);
+    navigation.navigate('Login');
+  };
   return (
     <SafeAreaView>
       <Text
@@ -42,8 +43,7 @@ const UpdateInfo = () => {
           fontFamily: 'Poppins-SemiBold',
           color: '#000',
           marginVertical: '10%',
-        }}
-      >
+        }}>
         Check Credentials
       </Text>
       <ScrollView>
@@ -63,16 +63,15 @@ const UpdateInfo = () => {
         <TouchableOpacity
           onPress={updateCredentials}
           style={styles.btn}
-          activeOpacity={1.0}
-        >
+          activeOpacity={1.0}>
           <Text style={styles.btnLable}>Update</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default UpdateInfo
+export default UpdateInfo;
 
 const styles = StyleSheet.create({
   label: {
@@ -100,4 +99,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-})
+});

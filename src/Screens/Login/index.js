@@ -1,19 +1,14 @@
-import React, {Component, Fragment, useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
-  Text,
   SafeAreaView,
-  TextInput,
   StyleSheet,
-  View,
-  TouchableOpacity,
-  ScrollView,
   Dimensions,
   ImageBackground,
   Image,
 } from 'react-native';
-import {addKeyToStorage, getValueFromStorage} from '../../helpers/asyncStorage';
+import {addKeyToStorage} from '../../helpers/asyncStorage';
 import {useNavigation} from '@react-navigation/native';
-import {COLORS, TxtWeight} from '../../Constants';
+import {TxtWeight, authenticateUser, updateToken} from '../../Constants';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
@@ -24,22 +19,47 @@ const WIDTH = Dimensions.get('screen').width;
 
 const Login = () => {
   const navigation = useNavigation();
-  const [port, setPort] = useState('');
-  const [host, setHost] = useState('');
+  const [username, setUsername] = useState('SuperUser');
+  const [password, setPassword] = useState('newpass');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    getInfo();
-  }, []);
+  const submitOnLogin = async () => {
+    if (!username || !password) {
+      alert('Please enter both username and password');
+      return;
+    }
 
-  const getInfo = async () => {
-    setPort(await getValueFromStorage('port'));
-    setHost(await getValueFromStorage('host'));
-    // setProtocol(await getValueFromStorage('protocol'));
+    setLoading(true);
+
+    try {
+      // Call the POST API to authenticate the user
+      const authToken = await authenticateUser(username, password);
+
+      if (authToken) {
+        // Call the PUT API to update the token
+        const updatedToken = await updateToken(authToken);
+
+        // Save the final token into storage
+        await addKeyToStorage('token', updatedToken);
+        alert('Login successful!');
+        navigation.navigate('Home'); // Navigate to the home screen or dashboard
+      } else {
+        alert('Failed to authenticate');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('An error occurred during login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground source={images.bgGrey} resizeMode="stretch" style={styles.topView}>
+      <ImageBackground
+        source={images.bgGrey}
+        resizeMode="stretch"
+        style={styles.topView}>
         <Image source={images.logo} style={styles.erLogo} />
         <Image source={images.bsmLogo} style={styles.bsmLogo} />
       </ImageBackground>
@@ -48,14 +68,23 @@ const Login = () => {
         Login
       </Txt>
 
-      <Input label={'Username'} placeholder={'Username'} />
+      <Input
+        label={'Username'}
+        value={username}
+        onChange={txt => setUsername(txt)}
+        placeholder={'Username'}
+      />
       <Input
         label={'Password'}
         secureTextEntry={true}
+        value={password}
+        onChange={txt => setPassword(txt)}
         placeholder={'Password'}
       />
 
-      <Btn style={{marginTop: 10}}>Login</Btn>
+      <Btn style={{marginTop: 10}} onPress={submitOnLogin} loading={loading}>
+        Login
+      </Btn>
     </SafeAreaView>
   );
 };

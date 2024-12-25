@@ -15,36 +15,36 @@ import AssetDetail from '../Screens/AssetDetail';
 const Stack = createNativeStackNavigator();
 
 function Navigator() {
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   updateAsyncStorageInfo();
-  // }, []);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    updateAsyncStorageInfo();
+  }, []);
 
-  // const updateAsyncStorageInfo = async () => {
-  //   const port = await getValueFromStorage('port');
-  //   const host = await getValueFromStorage('host');
-  //   const protocol = await getValueFromStorage('protocol');
-  //   if (!port) {
-  //     await addKeyToStorage('port', '4443');
-  //   }
-  //   if (!host) {
-  //     await addKeyToStorage('host', '202.163.101.237');
-  //   }
-  //   if (!protocol) {
-  //     await addKeyToStorage('protocol', 'https');
-  //   }
-  //   setLoading(false);
-  // };
+  const updateAsyncStorageInfo = async () => {
+    const port = await getValueFromStorage('port');
+    const host = await getValueFromStorage('host');
+    const protocol = await getValueFromStorage('protocol');
+    if (!port) {
+      await addKeyToStorage('port', '4443');
+    }
+    if (!host) {
+      await addKeyToStorage('host', '202.163.101.237');
+    }
+    if (!protocol) {
+      await addKeyToStorage('protocol', 'https');
+    }
+    setLoading(false);
+  };
 
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{headerShown: false}}
-        initialRouteName="Home">
+        initialRouteName="UpdateInfo">
+        <Stack.Screen name="UpdateInfo" component={UpdateInfo} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="AssetDetail" component={AssetDetail} />
-        <Stack.Screen name="UpdateInfo" component={UpdateInfo} />
         <Stack.Screen name="ChooseScanType" component={ChooseScanType} />
         <Stack.Screen name="DeviceInput" component={DeviceInput} />
 
