@@ -110,26 +110,32 @@ export async function updateToken(authToken) {
 }
 
 // Fetch Data by ID
-export async function fetchDataById(id = 1182061) {
+export const fetchAssetDetailsById = async assetNumber => {
   try {
-    const baseUrl = await getBaseUrl();
-    const authToken = await getAuthToken();
-    const getUrl = `${baseUrl}/api/v1/models/m_transaction?$filter=M_AttributeSetInstance_ID eq ${id}`;
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${port}://${host}:${protocol}`;
+    const url = `${baseUrl}/api/v1/models/A_Asset?$filter=a_asset_id eq ${assetNumber}`;
 
-    const response = await RNFetchBlob.config({
-      trusty: true, // Disable SSL certificate verification (use with caution)
-    }).fetch('GET', getUrl, {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${authToken}`,
-    });
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'GET',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+    );
 
-    const data = await response.json();
-    console.log('Fetched Data:', data);
-
-    return data;
+    const result = await response.json();
+    if (result?.records?.length > 0) {
+      return result.records[0]; // Return the first record
+    } else {
+      throw new Error('No Asset Found');
+    }
   } catch (error) {
-    console.error('Error fetching data:', error);
-    return error;
+    console.error('Error fetching asset details:', error);
+    throw error;
   }
-}
+};
