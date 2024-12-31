@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,7 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import {COLORS, Space, TxtWeight} from '../../Constants';
+import {COLORS, Space, TxtWeight, fetchHomeScreenData} from '../../Constants';
 import Container from '../../components/Container';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
@@ -45,26 +45,36 @@ const AssetCategoryTable = ({data}) => {
           Total Asset Quantity
         </Txt>
       </View>
-      {data.map((item, index) => (
-        <View key={index} style={styles.tableRow}>
-          <Txt style={[styles.tableCell, {flex: 2}]}>{item.category}</Txt>
-          <Txt style={styles.tableCell}>{item.quantity}</Txt>
-        </View>
-      ))}
+      {data &&
+        data?.['Groups'] &&
+        Object.entries(data?.['Groups']).map(
+          (
+            [category, quantity],
+            index, // Use Object.entries for key-value pairs
+          ) => {
+            const cleanedCategory = category.startsWith('Fixed Assets - ')
+              ? category.substring('Fixed Assets - '.length)
+              : category;
+
+            return (
+              <View key={index} style={styles.tableRow}>
+                <Txt style={[styles.tableCell, {flex: 2}]}>
+                  {cleanedCategory}
+                </Txt>
+                <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+                  {quantity}
+                </Txt>
+              </View>
+            );
+          },
+        )}
     </View>
   );
 };
 
 const Home = () => {
   const navigation = useNavigation();
-  const assetData = [
-    {category: 'A', quantity: 30},
-    {category: 'B', quantity: 20},
-    {category: 'C', quantity: 40},
-    {category: 'D', quantity: 90},
-    {category: 'E', quantity: 10},
-    {category: 'F', quantity: 60},
-  ];
+  const [assetsByCategory, setAssetsByCategory] = useState({});
 
   const locations = [
     {
@@ -94,9 +104,28 @@ const Home = () => {
     },
   ];
 
+  useEffect(() => {
+    getInfo();
+  }, []);
+
+  const getInfo = async () => {
+    const info = await fetchHomeScreenData();
+    if (info.logs) {
+      setAssetsByCategory(JSON.parse(info.logs[0]));
+    }
+  };
+
+  const totalAssets =
+    (assetsByCategory.Groups &&
+      Object.values(assetsByCategory.Groups).reduce(
+        (sum, quantity) => sum + parseInt(quantity, 10), // Parse to integer
+        0,
+      )) ||
+    0;
+  console.log('assetsByCategory=>', assetsByCategory);
+
   return (
-    <Container 
-    showBottom={false}>
+    <Container showBottom={false}>
       <View style={styles.cardRow}>
         <Card
           title="Asset Detail"
@@ -106,14 +135,18 @@ const Home = () => {
       </View>
       <View style={styles.cardRow}>
         <Card title="Asset Transfer" image={images.asset_transfer} />
-        <Card title="Asset Audit" image={images.asset_audit} />
+        <Card
+          title="Asset Audit"
+          onPress={() => navigation.navigate('AssetVerify')}
+          image={images.asset_audit}
+        />
       </View>
 
       <View style={styles.totalView}>
         <Txt color={COLORS.white} size={20} center>
           Total Assets |{'  '}
           <Txt weight={TxtWeight.Bold} color={COLORS.white} size={25}>
-            800
+            {totalAssets}
           </Txt>
         </Txt>
       </View>
@@ -122,7 +155,7 @@ const Home = () => {
         Asset Categories
       </Txt>
 
-      <AssetCategoryTable title="Asset Categories" data={assetData} />
+      <AssetCategoryTable title="Asset Categories" data={assetsByCategory} />
 
       <View style={styles.totalView}>
         <Txt color={COLORS.white} size={20} center>
@@ -178,8 +211,8 @@ const styles = StyleSheet.create({
   tableContainer: {
     backgroundColor: COLORS.bgGrey,
     padding: 10,
-    paddingHorizontal: Space.XL,
-    paddingBottom: Space.XL,
+    paddingHorizontal: Space.MD,
+    paddingBottom: Space.MD,
     borderRadius: 8,
     elevation: 1,
     marginBottom: 20,
@@ -205,8 +238,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     flex: 1,
     borderRadius: 6,
-    textAlign: 'center',
-    paddingVertical: 4,
+    textAlignVertical: 'center',
+    padding: 4,
+    paddingVertical: 8,
   },
   totalView: {
     paddingHorizontal: Space.XL,

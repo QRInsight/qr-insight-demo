@@ -1,100 +1,76 @@
-import React, {Component, Fragment} from 'react'
-import {
-  TouchableOpacity,
-  Text,
-  Linking,
-  View,
-  Image,
-  ImageBackground,
-  BackHandler,
-} from 'react-native'
-import QRCodeScanner from 'react-native-qrcode-scanner'
-import styles from './style'
-import {authenticateUser} from '../../Constants'
-class Scanner extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      scan: true,
-      ScanResult: false,
-      result: null,
-    }
-  }
+import React, {useState} from 'react';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
+import {images} from '../../assets';
+import Txt from '../../components/Txt';
+import {Input} from '../../components/TxtInput';
+import Container from '../../components/Container';
 
-  componentDidMount () {
-    authenticateUser()
-  }
-  onSuccess = e => {
-    console.log('scanned data---> ' + e.data)
-    this.props.navigation.navigate('Result', {id: e.data})
-    this.setState({
-      result: e,
-    })
-  }
-  activeQR = () => {
-    this.setState({scan: true})
-  }
-  scanAgain = () => {
-    this.setState({scan: true, ScanResult: false})
-  }
+// Mock Data for Asset Details
 
-  render () {
-    const {scan, ScanResult, result} = this.state
-    return (
-      <View style={styles.scrollViewStyle}>
-        <Fragment>
-          {!scan && !ScanResult && (
-            <View style={styles.cardView}>
-              {/* <Image source={require('./assets/camera.png')} style={{height: 36, width: 36}}></Image> */}
-              <Text numberOfLines={8} style={styles.descText}>
-                Please move your camera {'\n'} over the QR Code
-              </Text>
-              {/* <Image source={require('./assets/qr-code.png')} style={{margin: 20}}></Image> */}
-              <TouchableOpacity
-                onPress={this.activeQR}
-                style={styles.buttonScan}
-              >
-                <View style={styles.buttonWrapper}>
-                  {/* <Image source={require('./assets/camera.png')} style={{height: 36, width: 36}}></Image> */}
-                  <Text style={{...styles.buttonTextStyle, color: '#2196f3'}}>
-                    Scan QR Code
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
+const AssetVerify = () => {
+  const [assetData, setAssetData] = useState(null); // State to store API data
+  const [loading, setLoading] = useState(false); // Loading state
+  const [assetNumber, setAssetNumber] = useState('1000826'); // Input value for asset number
+  const navigation = useNavigation();
 
-          {scan && (
-            <QRCodeScanner
-              reactivate={true}
-              showMarker={true}
-              ref={node => {
-                this.scanner = node
-              }}
-              onRead={this.onSuccess}
-              topContent={
-                <Text style={styles.centerText}>
-                  Please move your camera {'\n'} over the QR Code
-                </Text>
-              }
-              bottomContent={
-                <View>
-                  <View style={styles.bottomContent}>
-                    <TouchableOpacity
-                      style={styles.buttonScan2}
-                      onPress={() => this.scanner.reactivate()}
-                      onLongPress={() => this.setState({scan: false})}
-                    >
-                      {/* <Image source={require('./assets/camera2.png')}></Image> */}
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              }
-            />
-          )}
-        </Fragment>
-      </View>
-    )
-  }
-}
-export default Scanner
+  return (
+    <Container onBack={() => navigation.goBack()} title="Scan">
+      {/* Input Field with Camera Button */}
+
+      {/* Displaying Asset Details */}
+    </Container>
+  );
+};
+
+export default AssetVerify;
+
+const styles = StyleSheet.create({
+  inputView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    flex: 1,
+    marginHorizontal: 0,
+  },
+  cameraButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    height: 51,
+    borderColor: COLORS.theme,
+    backgroundColor: COLORS.bgBlue,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cameraIcon: {
+    height: 20,
+    width: 20,
+  },
+  row: {
+    gap: 10,
+    marginVertical: 5,
+    flexDirection: 'row',
+  },
+  labelContainer: {
+    flex: 1,
+    borderRadius: 10,
+    backgroundColor: COLORS.bgGrey,
+    padding: 5,
+    paddingLeft: 12,
+    justifyContent: 'center',
+  },
+  valueContainer: {
+    flex: 1,
+    borderRadius: 10,
+    backgroundColor: COLORS.bgGrey,
+    padding: 8,
+    justifyContent: 'center',
+  },
+});

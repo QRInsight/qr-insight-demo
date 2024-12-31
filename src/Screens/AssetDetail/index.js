@@ -33,8 +33,7 @@ const keyToNameMapping = {
   'A_Asset_Action.identifier': 'Asset Action',
 };
 
-
-const getFriendlyName = (key) => keyToNameMapping[key] || key;
+const getFriendlyName = key => keyToNameMapping?.[key] || key;
 
 const AssetDetail = () => {
   const [assetData, setAssetData] = useState(null); // State to store API data
@@ -84,7 +83,9 @@ const AssetDetail = () => {
             <View key={index} style={styles.row}>
               <View style={styles.labelContainer}>
                 <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                {getFriendlyName(key)}
+                  {typeof assetData[key] === 'object'
+                    ? assetData[key]?.propertyLabel || '-'
+                    : assetData[key] || '-'}
                 </Txt>
               </View>
               <View style={styles.valueContainer}>
