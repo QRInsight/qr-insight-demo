@@ -139,3 +139,130 @@ export const fetchAssetDetailsById = async assetNumber => {
     throw error;
   }
 };
+
+// FETCH DATA OF HOME SCREEN
+export const fetchHomeScreenData = async () => {
+  try {
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${port}://${host}:${protocol}`;
+    const url = `${baseUrl}/api/v1/processes/api_homescreen`;
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'POST',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+      JSON.stringify({test: 'test'}),
+    );
+
+    const result = await response.json();
+    if (result) {
+      return result; // Return the first record
+    } else {
+      throw new Error('No Asset Found');
+    }
+  } catch (error) {
+    console.error('Error fetching asset details:', error);
+    throw error;
+  }
+};
+
+// FETCH PROJECTS
+export const fetchProjects = async () => {
+  try {
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${port}://${host}:${protocol}`;
+    const url = `${baseUrl}/api/v1/models/ER_AssetVerification?$filter=DocStatus eq 'DR'`;
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'GET',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+    );
+
+    const result = await response.json();
+    if (result?.records?.length > 0) {
+      return result.records; // Return the list of projects
+    } else {
+      throw new Error('No Projects Found');
+    }
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    throw error;
+  }
+};
+
+// FETCH RECORDS BY PROJECT
+export const fetchProjectLinesById = async verificationId => {
+  try {
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${port}://${host}:${protocol}`;
+    const url = `${baseUrl}/api/v1/models/ER_AssetVerificationLine?$filter=ER_AssetVerification_ID eq ${verificationId}`;
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'GET',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+    );
+
+    const result = await response.json();
+    if (result?.records?.length > 0) {
+      return result.records; // Return the list of lines
+    } else {
+      throw new Error('No Project Lines Found');
+    }
+  } catch (error) {
+    console.error('Error fetching project lines:', error);
+    throw error;
+  }
+};
+
+// UPDATE PROJECT RECORDS
+export const updateProjectLine = async (lineId, updatedData) => {
+  try {
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${port}://${host}:${protocol}`;
+    const url = `${baseUrl}/api/v1/models/ER_AssetVerificationLine/${lineId}`;
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'PUT',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      JSON.stringify(updatedData),
+    );
+
+    const result = await response.json();
+    if (result) {
+      return result; // Return the updated result
+    } else {
+      throw new Error('Error updating project line');
+    }
+  } catch (error) {
+    console.error('Error updating project line:', error);
+    throw error;
+  }
+};
