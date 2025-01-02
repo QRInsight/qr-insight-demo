@@ -112,17 +112,22 @@ const AssetVerify = () => {
           </TouchableOpacity>
 
           {/* Items for Project */}
+          <View style={{flex: 1, flexDirection: 'row'}}>
+            <Txt style={{flex: 1}}>Asset Name</Txt>
+            <Txt style={{flex: 1}}>Asset Desc</Txt>
+            <Txt style={{width: 100}}>Status</Txt>
+          </View>
           {projectOpenState[project.id] && (
             <View>
               {loadingItems[project.id] ? (
                 <ActivityIndicator size="small" color={COLORS.theme} />
               ) : (
                 itemsByProject[project.id]?.map((item, index) => (
-                  <View key={index} style={styles.itemCard}>
-                    <Txt size={14} style={styles.itemText}>
+                  <View key={index} style={{flex: 1, flexDirection: 'row'}}>
+                    <Txt style={{flex: 1}} size={14}>
                       Asset ID: {item?.A_Asset_ID?.id || 'N/A'}
                     </Txt>
-                    <Txt size={14} style={styles.itemText}>
+                    <Txt style={{flex: 1}} size={14}>
                       Identifier: {item?.A_Asset_ID?.identifier || 'N/A'}
                     </Txt>
                   </View>
