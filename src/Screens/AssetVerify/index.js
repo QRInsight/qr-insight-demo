@@ -17,27 +17,33 @@ import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
+import {Dropdown} from 'react-native-element-dropdown';
 
 const AssetVerify = () => {
   const [assetNumber, setAssetNumber] = useState(''); // Input value for asset number
   const [projects, setProjects] = useState([]); // Projects list
-  const [itemsByProject, setItemsByProject] = useState({}); // Items grouped by project
-  const [loadingItems, setLoadingItems] = useState({}); // Loading state per project
-  const [projectOpenState, setProjectOpenState] = useState({}); // Open/close state for each project
+  const [auditItems, setAuditItems] = useState([]); // Projects list
+  const [value, setValue] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
   const [loading, setLoading] = useState(false); // Global loading state
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchAssetDetails();
-  }, []);
+    if (!projects.length) {
+      fetchProjectsList(); // Load projects on component mount
+    }
+    if (value) {
+      fetchAuditsByProject();
+    }
+  }, [value]);
 
   // Fetch Projects
-  const fetchAssetDetails = async () => {
+  const fetchProjectsList = async () => {
     try {
       setLoading(true);
-      const projectData = await fetchProjects();
+      const projectData = await fetchProjects(); // Fetch all projects
       if (projectData?.length) {
-        setProjects(projectData);
+        setProjects(projectData); // Update projects state
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -46,38 +52,39 @@ const AssetVerify = () => {
     }
   };
 
-  // Fetch Items By Project
-  const fetchItemsByProject = async projectId => {
+  // Fetch Audits By Project
+  const fetchAuditsByProject = async () => {
     try {
-      setLoadingItems(prev => ({...prev, [projectId]: true}));
-
-      // Fetch data for the selected project
-      const itemsData = await fetchProjectLinesById(projectId);
-
-      // Update state with items for the project
-      setItemsByProject(prev => ({
-        ...prev,
-        [projectId]: itemsData,
-      }));
+      setLoading(true); // Set loading state for the project
+      const auditsData = await fetchProjectLinesById(value); // Fetch audits for the selected project
+      setAuditItems([...auditsData]);
+      setLoading(false); // Set loading state for the project
     } catch (error) {
-      console.error('Error fetching items for project:', error);
+      console.error('Error fetching audits for project:', error);
     } finally {
-      setLoadingItems(prev => ({...prev, [projectId]: false}));
+      setLoading(false); // Set loading state for the project
     }
   };
 
   // Handle Open/Close Toggle
-  const toggleProjectState = projectId => {
-    setProjectOpenState(prev => ({
-      ...prev,
-      [projectId]: !prev[projectId], // Toggle the open/close state
-    }));
+  // const toggleProjectState = projectId => {
+  //   setProjectOpenState(prev => ({
+  //     ...prev,
+  //     [projectId]: !prev[projectId], // Toggle the open/close state
+  //   }));
 
-    // Fetch items only if the project is being opened
-    if (!projectOpenState[projectId] && !itemsByProject[projectId]) {
-      fetchItemsByProject(projectId);
-    }
-  };
+  //   // Fetch items only if the project is being opened
+  //   if (!projectOpenState[projectId] && !itemsByProject[projectId]) {
+  //     fetchItemsByProject(projectId);
+  //   }
+  // };
+
+  const projectsArr = projects?.map(data => {
+    return {label: data?.C_Project_ID?.identifier, value: data.id};
+  });
+
+
+  console.log('auditItems=>',auditItems)
 
   return (
     <Container onBack={() => navigation.goBack()} title="Asset Audit">
@@ -91,55 +98,110 @@ const AssetVerify = () => {
         />
         <TouchableOpacity
           style={styles.cameraButton}
-          onPress={fetchAssetDetails}
+          onPress={fetchProjects}
           disabled={loading}>
           <Image source={images.camera} style={styles.cameraIcon} />
         </TouchableOpacity>
       </View>
 
-      {/* Projects List */}
-      {projects.map(project => (
-        <View key={project.id} style={{marginVertical: 10}}>
-          {/* Project Header */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => toggleProjectState(project.id)}
-            style={[styles.projectButton, {flexDirection: 'row'}]}>
-            <Txt center style={{flex: 1}}>
-              {project?.C_Project_ID?.identifier || 'Project'}{' '}
-            </Txt>
-            <Txt>{projectOpenState[project.id] ? '▲' : '▼'}</Txt>
-          </TouchableOpacity>
+      <Dropdown
+        data={projects?.map(data => {
+          return {label: data?.C_Project_ID?.identifier, value: data.id};
+        })}
+        itemTextStyle={{color: COLORS.theme}}
+        placeholderStyle={{color: '#ccc'}}
+        maxHeight={300}
+        style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        labelField="label"
+        valueField="value"
+        placeholder={!isFocus ? 'Select item' : '...'}
+        searchPlaceholder="Search..."
+        value={value}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={item => {
+          setValue(item.value);
+          setIsFocus(false);
+        }}
+      />
 
-          {/* Items for Project */}
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            <Txt style={{flex: 1}}>Asset Name</Txt>
-            <Txt style={{flex: 1}}>Asset Desc</Txt>
-            <Txt style={{width: 100}}>Status</Txt>
-          </View>
-          {projectOpenState[project.id] && (
-            <View>
-              {loadingItems[project.id] ? (
-                <ActivityIndicator size="small" color={COLORS.theme} />
-              ) : (
-                itemsByProject[project.id]?.map((item, index) => (
-                  <View key={index} style={{flex: 1, flexDirection: 'row'}}>
-                    <Txt style={{flex: 1}} size={14}>
-                      Asset ID: {item?.A_Asset_ID?.id || 'N/A'}
-                    </Txt>
-                    <Txt style={{flex: 1}} size={14}>
-                      Identifier: {item?.A_Asset_ID?.identifier || 'N/A'}
-                    </Txt>
-                  </View>
-                ))
-              )}
-            </View>
-          )}
+      {/* Projects List */}
+
+      <View
+        style={{
+          borderColor: COLORS.theme,
+          marginVertical: 12,
+          padding: 8,
+          borderRadius: 8,
+          borderWidth: 1,
+          backgroundColor: COLORS.bgGrey,
+        }}>
+        <View
+          style={{
+            flex: 1,
+            paddingVertical: 5,
+            flexDirection: 'row',
+          }}>
+          <Txt style={{flex: 1}}>Asset Name</Txt>
+          <Txt style={{flex: 1}}>Asset Desc</Txt>
+          <Txt style={{width: 100}}>Status</Txt>
         </View>
-      ))}
+        {auditItems.length ? (
+          <View>
+            {loading ? (
+              <ActivityIndicator size="small" color={COLORS.theme} />
+            ) : (
+              auditItems?.map((item, index) => (
+                <View
+                  key={index}
+                  style={{flex: 1, gap: 4, flexDirection: 'row'}}>
+                  <Txt
+                    style={{
+                      flex: 1,
+                      backgroundColor: '#fff',
+                      padding: 2,
+                      marginVertical: 2,
+                      borderRadius: 5,
+                    }}
+                    size={14}>
+                    {item?.A_Asset_ID?.id?.toString() || 'N/A'}
+                  </Txt>
+                  <Txt
+                    style={{
+                      flex: 2,
+                      paddingVertical: 3,
+                      marginVertical: 2,
+                      padding :5,
+                      borderRadius: 5,
+                      backgroundColor: '#fff',
+                    }}
+                    size={14}>
+                    {item?.A_Asset_ID?.identifier || 'N/A'}
+                  </Txt>
+
+                  <View
+                    style={{
+                      width: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={item.Status ? images.right : images.wrong}
+                      style={{height: 20, width: 20}}
+                    />
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+        ) : null}
+      </View>
 
       {/* Footer Summary */}
-      <View style={styles.footer}>
+      {/* <View style={styles.footer}>
         <View style={styles.footerItem}>
           <Txt>Total Assets</Txt>
           <Txt>800</Txt>
@@ -156,7 +218,7 @@ const AssetVerify = () => {
           <Txt>Report</Txt>
           <Txt>800</Txt>
         </View>
-      </View>
+      </View> */}
     </Container>
   );
 };
@@ -217,5 +279,42 @@ const styles = StyleSheet.create({
   },
   footerItem: {
     alignItems: 'center',
+  },
+  container: {
+    backgroundColor: 'white',
+    padding: 16,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });
