@@ -5,13 +5,14 @@ import {
   Dimensions,
   ImageBackground,
   Image,
+  View,
+  TextInput,
 } from 'react-native';
 import {addKeyToStorage} from '../../helpers/asyncStorage';
 import {useNavigation} from '@react-navigation/native';
 import {TxtWeight, authenticateUser, updateToken} from '../../Constants';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
-import {Input} from '../../components/TxtInput';
 import {Btn} from '../../components/Btn';
 
 const HEIGHT = Dimensions.get('screen').height;
@@ -41,7 +42,6 @@ const Login = () => {
 
         // Save the final token into storage
         await addKeyToStorage('token', updatedToken);
-        alert('Login successful!');
         navigation.navigate('Home'); // Navigate to the home screen or dashboard
       } else {
         alert('Failed to authenticate');
@@ -67,20 +67,27 @@ const Login = () => {
       <Txt center mt={10} mb={10} size={36} weight={TxtWeight.Semi}>
         Login
       </Txt>
-
-      <Input
-        label={'Username'}
-        value={username}
-        onChange={txt => setUsername(txt)}
-        placeholder={'Username'}
-      />
-      <Input
-        label={'Password'}
-        secureTextEntry={true}
-        value={password}
-        onChange={txt => setPassword(txt)}
-        placeholder={'Password'}
-      />
+      <View style={styles.inputGroup}>
+        <Txt style={styles.label}>Username</Txt>
+        <TextInput
+          label={'Username'}
+          style={styles.input}
+          value={username}
+          onChangeText={txt => setUsername(txt)}
+          placeholder={'Username'}
+        />
+      </View>
+      <View style={styles.inputGroup}>
+        <Txt style={styles.label}>Password</Txt>
+        <TextInput
+          label={'Password'}
+          style={styles.input}
+          secureTextEntry={true}
+          value={password}
+          onChangeText={txt => setPassword(txt)}
+          placeholder={'Password'}
+        />
+      </View>
 
       <Btn style={{marginTop: 10}} onPress={submitOnLogin} loading={loading}>
         Login
@@ -120,6 +127,27 @@ const styles = StyleSheet.create({
     color: '#000',
     borderColor: '#ccc',
     borderWidth: 1,
+    height : 50
+  },
+  inputGroup: {
+    marginBottom: 12,
+    marginHorizontal: 20,
+  },
+  label: {
+    fontFamily: 'Poppins-Medium',
+    marginLeft: 4,
+    color: '#000',
+    marginBottom: 4,
+  },
+  input: {
+    fontFamily: 'Poppins-Regular',
+    backgroundColor: '#fff',
+    color: '#000',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    height: 40,
   },
   btn: {
     backgroundColor: '#2980b9',

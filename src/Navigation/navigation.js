@@ -52,8 +52,6 @@ function Navigator() {
         <Stack.Screen name="ChooseScanType" component={ChooseScanType} />
         <Stack.Screen name="DeviceInput" component={DeviceInput} />
         <Stack.Screen name="Scanner" component={Scanner} />
-        
-        <Stack.Screen name="Scanner" component={Scanner} />
         <Stack.Screen name="Result" component={Result} />
       </Stack.Navigator>
     </NavigationContainer>

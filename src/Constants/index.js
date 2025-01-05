@@ -8,6 +8,7 @@ export const COLORS = {
   theme: '#02618E',
   bgBlue: '#DFF1FF',
   white: '#fff',
+  borderColor : "#000"
 };
 
 export const TxtWeight = {

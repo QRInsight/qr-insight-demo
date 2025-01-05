@@ -1,8 +1,22 @@
-import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, TouchableOpacity, Text, Alert} from 'react-native';
-import {Camera, useCameraDevice, useCameraPermission} from 'react-native-vision-camera';
+import React, {useState, useCallback, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Alert,
+  Platform,
+} from 'react-native';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useFrameProcessor,
+  useCodeScanner,
+} from 'react-native-vision-camera';
 import {COLORS} from '../../Constants';
 import {Image} from 'react-native';
+import {PermissionsAndroid} from 'react-native';
 
 const PermissionsPage = () => (
   <View style={styles.centered}>
@@ -19,16 +33,41 @@ const NoCameraDeviceError = () => (
 const Scanner = () => {
   const [assetNumber, setAssetNumber] = useState('1000826');
   const [isScanning, setIsScanning] = useState(true);
+  const codeScanner = useCodeScanner({
+    codeTypes: ['qr', 'ean-13'],
+    onCodeScanned: codes => {
+      Alert.alert(`Scanned ${codes.length} codes!`);
+    },
+  });
+
   const {hasPermission} = useCameraPermission();
   const device = useCameraDevice('back');
 
-  // const [frameProcessor, barcodes] = useScanBarcodes([
-  //   BarcodeFormat.QR_CODE,
-  //   BarcodeFormat.CODE_128,
-  //   BarcodeFormat.EAN_13,
-  // ], {
-  //   checkInverted: true,
-  // });
+  useEffect(() => {
+    if (!hasPermission && Platform.OS == 'android') {
+      requestAndroidCameraPermission();
+    }
+  }, [hasPermission]);
+
+  const requestAndroidCameraPermission = useCallback(async () => {
+    try {
+      const permissionGranted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: '<your title here>',
+          message: '<your message here>',
+          buttonNegative: 'Deny',
+          buttonPositive: 'Allow',
+        },
+      );
+      // then access permission status
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        // permissons have been accepted - update a useState() here or whatever your usecase is :)
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }, []);
 
   // const handleBarCodeScanned = useCallback((scannedBarcodes) => {
   //   if (scannedBarcodes.length > 0 && isScanning) {
@@ -72,7 +111,7 @@ const Scanner = () => {
         style={StyleSheet.absoluteFill}
         device={device}
         isActive={isScanning}
-        frameProcessor={frameProcessor}
+        codeScanner={codeScanner}
         frameProcessorFps={5}
       />
       <View style={styles.overlay}>
@@ -85,7 +124,7 @@ const Scanner = () => {
   );
 };
 
-export default  Scanner;
+export default Scanner;
 
 const styles = StyleSheet.create({
   container: {
