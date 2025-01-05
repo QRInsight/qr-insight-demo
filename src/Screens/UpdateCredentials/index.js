@@ -16,12 +16,12 @@ const UpdateInfo = () => {
 
   // State for credentials
   const [credentials, setCredentials] = useState({
-    protocol: '',
-    host: '',
-    port: '',
-    organizationId: '',
-    clientId: '',
-    roleId: '',
+    protocol: '2443',
+    host: 'bsmlive.erinsight.com',
+    port: 'https',
+    organizationId: '1000020',
+    clientId: '1000016',
+    roleId: '1000002',
   });
 
   // Fetch stored values on component mount
@@ -42,7 +42,9 @@ const UpdateInfo = () => {
 
   // Update all keys to local storage
   const updateCredentials = async () => {
+   await addKeyToStorage('host', 'bsmlive.erinsight.com');
     for (const [key, value] of Object.entries(credentials)) {
+      console.log('credentials=>', credentials);
       await addKeyToStorage(key, value);
     }
     navigation.navigate('Login');

@@ -1,32 +1,123 @@
-import React, {useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
-import {images} from '../../assets';
-import Txt from '../../components/Txt';
-import {Input} from '../../components/TxtInput';
-import Container from '../../components/Container';
+import React, {useState, useCallback} from 'react';
+import {View, StyleSheet, TouchableOpacity, Text, Alert} from 'react-native';
+import {Camera, useCameraDevice, useCameraPermission} from 'react-native-vision-camera';
+import {COLORS} from '../../Constants';
+import {Image} from 'react-native';
 
-// Mock Data for Asset Details
+const PermissionsPage = () => (
+  <View style={styles.centered}>
+    <Text>Please grant camera permissions to use the scanner.</Text>
+  </View>
+);
 
-const AssetVerify = () => {
-  const [assetData, setAssetData] = useState(null); // State to store API data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [assetNumber, setAssetNumber] = useState('1000826'); // Input value for asset number
-  const navigation = useNavigation();
+const NoCameraDeviceError = () => (
+  <View style={styles.centered}>
+    <Text>No camera device available</Text>
+  </View>
+);
+
+const Scanner = () => {
+  const [assetNumber, setAssetNumber] = useState('1000826');
+  const [isScanning, setIsScanning] = useState(true);
+  const {hasPermission} = useCameraPermission();
+  const device = useCameraDevice('back');
+
+  // const [frameProcessor, barcodes] = useScanBarcodes([
+  //   BarcodeFormat.QR_CODE,
+  //   BarcodeFormat.CODE_128,
+  //   BarcodeFormat.EAN_13,
+  // ], {
+  //   checkInverted: true,
+  // });
+
+  // const handleBarCodeScanned = useCallback((scannedBarcodes) => {
+  //   if (scannedBarcodes.length > 0 && isScanning) {
+  //     setIsScanning(false);
+  //     const scannedValue = scannedBarcodes[0].displayValue;
+  //     setAssetNumber(scannedValue);
+  //     Alert.alert(
+  //       'Barcode Detected',
+  //       `Scanned Asset Number: ${scannedValue}`,
+  //       [
+  //         {
+  //           text: 'Scan Again',
+  //           onPress: () => setIsScanning(true),
+  //           style: 'cancel',
+  //         },
+  //         {
+  //           text: 'Confirm',
+  //           onPress: () => {
+  //             // Handle the confirmed barcode value
+  //             console.log('Confirmed asset number:', scannedValue);
+  //           },
+  //         },
+  //       ],
+  //     );
+  //   }
+  // }, [isScanning]);
+
+  // // Watch for barcode updates
+  // React.useEffect(() => {
+  //   if (barcodes) {
+  //     handleBarCodeScanned(barcodes);
+  //   }
+  // }, [barcodes, handleBarCodeScanned]);
+
+  if (!hasPermission) return <PermissionsPage />;
+  if (device == null) return <NoCameraDeviceError />;
 
   return (
-    <Container onBack={() => navigation.goBack()} title="Scan">
-      {/* Input Field with Camera Button */}
-
-      {/* Displaying Asset Details */}
-    </Container>
+    <View style={styles.container}>
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={isScanning}
+        frameProcessor={frameProcessor}
+        frameProcessorFps={5}
+      />
+      <View style={styles.overlay}>
+        <View style={styles.scanFrame} />
+        <Text style={styles.instructions}>
+          Position the barcode within the frame
+        </Text>
+      </View>
+    </View>
   );
 };
 
-export default AssetVerify;
+export default  Scanner;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanFrame: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: COLORS.theme,
+    backgroundColor: 'transparent',
+  },
+  instructions: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 20,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 10,
+    borderRadius: 5,
+  },
+  // ... keeping your existing styles ...
   inputView: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -57,7 +57,7 @@ export async function authenticateUser(username, password) {
   const protocol = await getValueFromStorage('protocol');
   const port = await getValueFromStorage('port');
   const host = await getValueFromStorage('host');
-  const baseUrl = `${port}://${host}:${protocol}`;
+  const baseUrl = `${protocol}://${host}:${port}`;
   console.log('baseUrl==>', baseUrl);
 
   const requestBody = JSON.stringify({
@@ -84,7 +84,7 @@ export async function updateToken(authToken) {
   const protocol = await getValueFromStorage('protocol');
   const port = await getValueFromStorage('port');
   const host = await getValueFromStorage('host');
-  const baseUrl = `${port}://${host}:${protocol}`;
+  const baseUrl = `${protocol}://${host}:${port}`;
 
   const requestBody = JSON.stringify({
     clientId: 1000002,
@@ -116,7 +116,7 @@ export const fetchAssetDetailsById = async assetNumber => {
     const protocol = await getValueFromStorage('protocol');
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
-    const baseUrl = `${port}://${host}:${protocol}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/models/A_Asset?$filter=a_asset_id eq ${assetNumber}`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
@@ -147,7 +147,7 @@ export const fetchHomeScreenData = async () => {
     const protocol = await getValueFromStorage('protocol');
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
-    const baseUrl = `${port}://${host}:${protocol}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/processes/api_homescreen`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
@@ -179,7 +179,7 @@ export const fetchProjects = async () => {
     const protocol = await getValueFromStorage('protocol');
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
-    const baseUrl = `${port}://${host}:${protocol}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/models/ER_AssetVerification?$filter=DocStatus eq 'DR'`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
@@ -210,7 +210,7 @@ export const fetchProjectLinesById = async verificationId => {
     const protocol = await getValueFromStorage('protocol');
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
-    const baseUrl = `${port}://${host}:${protocol}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/models/ER_AssetVerificationLine?$filter=ER_AssetVerification_ID eq ${verificationId}`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
@@ -241,7 +241,7 @@ export const updateProjectLine = async (lineId, updatedData) => {
     const protocol = await getValueFromStorage('protocol');
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
-    const baseUrl = `${port}://${host}:${protocol}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/models/ER_AssetVerificationLine/${lineId}`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(

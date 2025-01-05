@@ -27,10 +27,10 @@ function Navigator() {
     const host = await getValueFromStorage('host');
     const protocol = await getValueFromStorage('protocol');
     if (!port) {
-      await addKeyToStorage('port', '4443');
+      await addKeyToStorage('port', '2443');
     }
     if (!host) {
-      await addKeyToStorage('host', '202.163.101.237');
+      await addKeyToStorage('host', 'bsmlive.erinsight.com');
     }
     if (!protocol) {
       await addKeyToStorage('protocol', 'https');
@@ -51,7 +51,8 @@ function Navigator() {
         <Stack.Screen name="AssetVerify" component={AssetVerify} />
         <Stack.Screen name="ChooseScanType" component={ChooseScanType} />
         <Stack.Screen name="DeviceInput" component={DeviceInput} />
-
+        <Stack.Screen name="Scanner" component={Scanner} />
+        
         <Stack.Screen name="Scanner" component={Scanner} />
         <Stack.Screen name="Result" component={Result} />
       </Stack.Navigator>

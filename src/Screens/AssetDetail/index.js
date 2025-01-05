@@ -70,7 +70,7 @@ const AssetDetail = () => {
         />
         <TouchableOpacity
           style={styles.cameraButton}
-          onPress={handleFetchAssetDetails}
+          onPress={()=> navigation.navigate('Scanner')}
           disabled={loading}>
           <Image source={images.camera} style={styles.cameraIcon} />
         </TouchableOpacity>

@@ -80,7 +80,7 @@ const AssetTransfer = () => {
       const protocol = await getValueFromStorage('protocol');
       const host = await getValueFromStorage('host');
       const port = await getValueFromStorage('port');
-      const baseUrl = `${port}://${host}:${protocol}`;
+      const baseUrl = `${protocol}://${host}:${port}`;
       try {
         const responses = await Promise.all(
           apiEndpoints.map(endpoint =>
