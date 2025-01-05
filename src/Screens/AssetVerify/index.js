@@ -83,8 +83,7 @@ const AssetVerify = () => {
     return {label: data?.C_Project_ID?.identifier, value: data.id};
   });
 
-
-  console.log('auditItems=>',auditItems)
+  console.log('auditItems=>', auditItems);
 
   return (
     <Container onBack={() => navigation.goBack()} title="Asset Audit">
@@ -106,7 +105,14 @@ const AssetVerify = () => {
 
       <Dropdown
         data={projects?.map(data => {
-          return {label: data?.C_Project_ID?.identifier, value: data.id};
+          console.log('data?===>', data);
+          return (
+            data?.C_Project_ID?.id && {
+              label:
+                data?.C_Project_ID?.id + ' - ' + data?.C_Project_ID?.identifier,
+              value: data.id,
+            }
+          );
         })}
         itemTextStyle={{color: COLORS.theme}}
         placeholderStyle={{color: '#ccc'}}
@@ -174,7 +180,7 @@ const AssetVerify = () => {
                       flex: 2,
                       paddingVertical: 3,
                       marginVertical: 2,
-                      padding :5,
+                      padding: 5,
                       borderRadius: 5,
                       backgroundColor: '#fff',
                     }}

@@ -104,9 +104,13 @@ const Home = () => {
     },
   ];
 
+ 
+
   useEffect(() => {
     getInfo();
   }, []);
+
+  
 
   const getInfo = async () => {
     const info = await fetchHomeScreenData();
@@ -134,7 +138,11 @@ const Home = () => {
         <Card title="Asset Report" image={images.asset_report} />
       </View>
       <View style={styles.cardRow}>
-        <Card title="Asset Transfer" image={images.asset_transfer} />
+        <Card
+          title="Asset Transfer"
+          onPress={() => navigation.navigate('AssetTransfer')}
+          image={images.asset_transfer}
+        />
         <Card
           title="Asset Audit"
           onPress={() => navigation.navigate('AssetVerify')}
