@@ -1,5 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useContext, useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
 import {images} from '../../assets';
@@ -10,6 +16,7 @@ import {getValueFromStorage} from '../../helpers/asyncStorage';
 import RNFetchBlob from 'rn-fetch-blob';
 import {Dropdown} from 'react-native-element-dropdown';
 import {Btn} from '../../components/Btn';
+import {DropdownContext} from '../../context/DropdownContext';
 
 // Mock Data for Asset Details
 const notIclude = [
@@ -61,65 +68,74 @@ const apiEndpoints = [
   },
 ];
 
-const AssetTransfer = () => {
+const AssetTransfer = ({route}) => {
+  const {dropdownData, loading: dropdownLoading} = useContext(DropdownContext);
+  console.log('dropdownData=>', dropdownData);
   const [assetData, setAssetData] = useState(null); // State to store API data
   const [loading, setLoading] = useState(false); // Loading state
-  const [assetNumber, setAssetNumber] = useState('1000836'); // Input value for asset number
-  const [dropdownData, setDropdownData] = useState({}); // Data for dropdowns
+  const [assetNumber, setAssetNumber] = useState(''); // Input value for asset number
+  // const [dropdownData, setDropdownData] = useState({}); // Data for dropdowns
   const [selectedValues, setSelectedValues] = useState({}); // Selected values
   const [isDataFetched, setIsDataFetched] = useState(false); // Track if data is fetched
 
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Fetch data for all dropdowns
-    const fetchDropdownData = async () => {
-      if (isDataFetched) return; // Avoid redundant fetches
-      setLoading(true);
-      const authToken = await getValueFromStorage('token'); // Get token from storage
-      const protocol = await getValueFromStorage('protocol');
-      const host = await getValueFromStorage('host');
-      const port = await getValueFromStorage('port');
-      const baseUrl = `${protocol}://${host}:${port}`;
-      try {
-        const responses = await Promise.all(
-          apiEndpoints.map(endpoint =>
-            RNFetchBlob.config({trusty: true})
-              .fetch('GET', `${baseUrl}${endpoint.url}`, {
-                Authorization: `Bearer ${authToken}`,
-                Accept: 'application/json',
-              })
-              .then(res => {
-                const result = JSON.parse(res?.data); // Ensure JSON parsing
+    if (route.params?.assetNumber) {
+      setAssetNumber(route.params.assetNumber);
+      handleFetchAssetDetails(route.params.assetNumber);
+    }
+  }, [route.params, assetNumber]);
 
-                return {
-                  label: endpoint.label,
-                  data: result?.records?.map(item => ({
-                    label:
-                      item.Name ||
-                      item.Designation ||
-                      item?.M_Warehouse_ID?.identifier,
-                    value: item.id || item.code,
-                  })),
-                };
-              }),
-          ),
-        );
-        const dropdowns = responses.reduce(
-          (acc, curr) => ({...acc, [curr.label]: curr.data}),
-          {},
-        );
-        setDropdownData(dropdowns);
-        setIsDataFetched(true);
-      } catch (error) {
-        console.log('error=>', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   // Fetch data for all dropdowns
+  //   const fetchDropdownData = async () => {
+  //     if (isDataFetched) return; // Avoid redundant fetches
+  //     setLoading(true);
+  //     const authToken = await getValueFromStorage('token'); // Get token from storage
+  //     const protocol = await getValueFromStorage('protocol');
+  //     const host = await getValueFromStorage('host');
+  //     const port = await getValueFromStorage('port');
+  //     const baseUrl = `${protocol}://${host}:${port}`;
+  //     try {
+  //       const responses = await Promise.all(
+  //         apiEndpoints.map(endpoint =>
+  //           RNFetchBlob.config({trusty: true})
+  //             .fetch('GET', `${baseUrl}${endpoint.url}`, {
+  //               Authorization: `Bearer ${authToken}`,
+  //               Accept: 'application/json',
+  //             })
+  //             .then(res => {
+  //               const result = JSON.parse(res?.data); // Ensure JSON parsing
 
-    fetchDropdownData();
-  }, []);
+  //               return {
+  //                 label: endpoint.label,
+  //                 data: result?.records?.map(item => ({
+  //                   label:
+  //                     item.Name ||
+  //                     item.Designation ||
+  //                     item?.M_Warehouse_ID?.identifier,
+  //                   value: item.id || item.code,
+  //                 })),
+  //               };
+  //             }),
+  //         ),
+  //       );
+  //       const dropdowns = responses.reduce(
+  //         (acc, curr) => ({...acc, [curr.label]: curr.data}),
+  //         {},
+  //       );
+  //       setDropdownData(dropdowns);
+  //       setIsDataFetched(true);
+  //     } catch (error) {
+  //       console.log('error=>', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchDropdownData();
+  // }, []);
 
   const handleFetchAssetDetails = async () => {
     if (!assetNumber) {
@@ -128,6 +144,7 @@ const AssetTransfer = () => {
     }
 
     setLoading(true);
+    console.log('Fetching starts====>');
     try {
       const data = await fetchAssetDetailsById(assetNumber); // Call the API function
       setAssetData(data); // Set the fetched asset data
@@ -137,8 +154,6 @@ const AssetTransfer = () => {
       setLoading(false);
     }
   };
-
-  console.log('assetData===>', assetData);
 
   return (
     <Container onBack={() => navigation.goBack()} title="Asset Transfer">
@@ -152,16 +167,23 @@ const AssetTransfer = () => {
         />
         <TouchableOpacity
           style={styles.cameraButton}
-          onPress={handleFetchAssetDetails}
+          onPress={() => navigation.navigate('Scanner', {fromTransfer: true})}
           disabled={loading}>
           <Image source={images.camera} style={styles.cameraIcon} />
         </TouchableOpacity>
       </View>
 
+      {loading ? (
+        <ActivityIndicator
+          size={'large'}
+          style={{alignSelf: 'center', marginVertical: 10}}
+        />
+      ) : null}
+
       {/* Displaying Asset Details */}
       {assetData ? (
         <View>
-          {Object.keys(assetData).map((key, index) =>
+          {Object.keys(assetData)?.map((key, index) =>
             typeof assetData[key] === 'object' &&
             !notIclude.includes(assetData[key]?.propertyLabel) ? (
               <View key={index} style={styles.row}>
@@ -252,9 +274,15 @@ const AssetTransfer = () => {
           })
         : null}
 
-      {assetData ? <Btn style={{
-        marginVertical : 14
-      }}> Transfer Asset </Btn> : null}
+      {assetData ? (
+        <Btn
+          style={{
+            marginVertical: 14,
+          }}>
+          {' '}
+          Transfer Asset{' '}
+        </Btn>
+      ) : null}
     </Container>
   );
 };

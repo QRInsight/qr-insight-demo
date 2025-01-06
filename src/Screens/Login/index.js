@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     color: '#000',
     borderColor: '#ccc',
     borderWidth: 1,
-    height : 50
+    height: 50,
   },
   inputGroup: {
     marginBottom: 12,
@@ -139,16 +139,7 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 4,
   },
-  input: {
-    fontFamily: 'Poppins-Regular',
-    backgroundColor: '#fff',
-    color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    height: 40,
-  },
+
   btn: {
     backgroundColor: '#2980b9',
     height: 41,

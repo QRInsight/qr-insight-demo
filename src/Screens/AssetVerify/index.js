@@ -12,6 +12,7 @@ import {
   TxtWeight,
   fetchProjects,
   fetchProjectLinesById,
+  updateProjectLine,
 } from '../../Constants';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
@@ -19,7 +20,7 @@ import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 import {Dropdown} from 'react-native-element-dropdown';
 
-const AssetVerify = () => {
+const AssetVerify = ({route}) => {
   const [assetNumber, setAssetNumber] = useState(''); // Input value for asset number
   const [projects, setProjects] = useState([]); // Projects list
   const [auditItems, setAuditItems] = useState([]); // Projects list
@@ -37,6 +38,16 @@ const AssetVerify = () => {
     }
   }, [value]);
 
+  useEffect(() => {
+    if (route.params?.assetNumber) {
+      setAssetNumber(route.params.assetNumber);
+      updateProjectLine(route.params.assetNumber);
+    }
+  }, [route.params]);
+
+  const updateProjectLine = async assetNumber => {
+    await updateProjectLine(assetNumber, {Status: true});
+  };
   // Fetch Projects
   const fetchProjectsList = async () => {
     try {
@@ -66,24 +77,6 @@ const AssetVerify = () => {
     }
   };
 
-  // Handle Open/Close Toggle
-  // const toggleProjectState = projectId => {
-  //   setProjectOpenState(prev => ({
-  //     ...prev,
-  //     [projectId]: !prev[projectId], // Toggle the open/close state
-  //   }));
-
-  //   // Fetch items only if the project is being opened
-  //   if (!projectOpenState[projectId] && !itemsByProject[projectId]) {
-  //     fetchItemsByProject(projectId);
-  //   }
-  // };
-
-  const projectsArr = projects?.map(data => {
-    return {label: data?.C_Project_ID?.identifier, value: data.id};
-  });
-
-  console.log('auditItems=>', auditItems);
 
   return (
     <Container onBack={() => navigation.goBack()} title="Asset Audit">
@@ -136,15 +129,7 @@ const AssetVerify = () => {
 
       {/* Projects List */}
 
-      <View
-        style={{
-          borderColor: COLORS.theme,
-          marginVertical: 12,
-          padding: 8,
-          borderRadius: 8,
-          borderWidth: 1,
-          backgroundColor: COLORS.bgGrey,
-        }}>
+      <View style={styles.tableContainer}>
         <View
           style={{
             flex: 1,
@@ -161,30 +146,18 @@ const AssetVerify = () => {
               <ActivityIndicator size="small" color={COLORS.theme} />
             ) : (
               auditItems?.map((item, index) => (
-                <View
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('Scanner', {
+                      lineId: item.id, // Pass line ID for updating
+                    })
+                  }
                   key={index}
                   style={{flex: 1, gap: 4, flexDirection: 'row'}}>
-                  <Txt
-                    style={{
-                      flex: 1,
-                      backgroundColor: '#fff',
-                      padding: 2,
-                      marginVertical: 2,
-                      borderRadius: 5,
-                    }}
-                    size={14}>
+                  <Txt style={styles.txt} size={14}>
                     {item?.A_Asset_ID?.id?.toString() || 'N/A'}
                   </Txt>
-                  <Txt
-                    style={{
-                      flex: 2,
-                      paddingVertical: 3,
-                      marginVertical: 2,
-                      padding: 5,
-                      borderRadius: 5,
-                      backgroundColor: '#fff',
-                    }}
-                    size={14}>
+                  <Txt style={styles.assetId} size={14}>
                     {item?.A_Asset_ID?.identifier || 'N/A'}
                   </Txt>
 
@@ -199,7 +172,7 @@ const AssetVerify = () => {
                       style={{height: 20, width: 20}}
                     />
                   </View>
-                </View>
+                </TouchableOpacity>
               ))
             )}
           </View>
@@ -277,6 +250,21 @@ const styles = StyleSheet.create({
   itemText: {
     paddingVertical: 2,
   },
+  txt: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 2,
+    marginVertical: 2,
+    borderRadius: 5,
+  },
+  assetId: {
+    flex: 2,
+    paddingVertical: 3,
+    marginVertical: 2,
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -322,5 +310,13 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
+  },
+  tableContainer: {
+    borderColor: COLORS.theme,
+    marginVertical: 12,
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: COLORS.bgGrey,
   },
 });

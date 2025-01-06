@@ -1,56 +1,34 @@
-import React, {useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {Alert, Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 
-// Mock Data for Asset Details
-const keyToNameMapping = {
-  id: 'Asset ID',
-  uid: 'Unique ID',
-  IsDisposed: 'Disposed',
-  IsInPosession: 'In Possession',
-  IsActive: 'Active',
-  Created: 'Creation Date',
-  Updated: 'Last Updated',
-  Value: 'Inventory Number',
-  Name: 'Asset Name',
-  Description: 'Description',
-  IsOwned: 'Owned',
-  AssetActivationDate: 'Activation Date',
-  Locationdescription: 'Location',
-  'M_Locator_ID.identifier': 'Locator',
-  'CreatedBy.identifier': 'Created By',
-  'UpdatedBy.identifier': 'Updated By',
-  'AD_Org_ID.identifier': 'Organization',
-  'M_Product_ID.identifier': 'Product',
-  'A_Asset_Group_ID.identifier': 'Asset Group',
-  'C_Project_ID.identifier': 'Project',
-  'A_Asset_Status.identifier': 'Asset Status',
-  'A_Asset_Action.identifier': 'Asset Action',
-};
 
-const getFriendlyName = key => keyToNameMapping?.[key] || key;
+
 
 const AssetDetail = () => {
-  const [assetData, setAssetData] = useState(null); // State to store API data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [assetNumber, setAssetNumber] = useState('1000826'); // Input value for asset number
+  const [assetData, setAssetData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [assetNumber, setAssetNumber] = useState('');
   const navigation = useNavigation();
+  const route = useRoute();
 
-  const handleFetchAssetDetails = async () => {
-    if (!assetNumber) {
-      Alert.alert('Error', 'Please enter an Asset Number.');
-      return;
+  useEffect(() => {
+    if (route.params?.assetNumber) {
+      setAssetNumber(route.params.assetNumber);
+      handleFetchAssetDetails(route.params.assetNumber);
     }
+  }, [route.params]);
 
+  const handleFetchAssetDetails = async assetNumber => {
     setLoading(true);
     try {
-      const data = await fetchAssetDetailsById(assetNumber); // Call the API function
-      setAssetData(data); // Set the fetched asset data
+      const data = await fetchAssetDetailsById(assetNumber); // Fetch data from API
+      setAssetData(data);
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to fetch asset details.');
     } finally {
@@ -70,7 +48,7 @@ const AssetDetail = () => {
         />
         <TouchableOpacity
           style={styles.cameraButton}
-          onPress={()=> navigation.navigate('Scanner')}
+          onPress={() => navigation.navigate('Scanner')}
           disabled={loading}>
           <Image source={images.camera} style={styles.cameraIcon} />
         </TouchableOpacity>

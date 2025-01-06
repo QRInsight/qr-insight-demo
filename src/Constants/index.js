@@ -118,7 +118,7 @@ export const fetchAssetDetailsById = async assetNumber => {
     const host = await getValueFromStorage('host');
     const port = await getValueFromStorage('port');
     const baseUrl = `${protocol}://${host}:${port}`;
-    const url = `${baseUrl}/api/v1/models/A_Asset?$filter=a_asset_id eq ${assetNumber}`;
+    const url = `${baseUrl}/api/v1/models/A_Asset?$filter=value eq '${assetNumber}'`;
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
       'GET',

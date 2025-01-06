@@ -1,22 +1,20 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   Text,
   Alert,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {
   Camera,
   useCameraDevice,
   useCameraPermission,
-  useFrameProcessor,
   useCodeScanner,
 } from 'react-native-vision-camera';
+import {useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../Constants';
-import {Image} from 'react-native';
-import {PermissionsAndroid} from 'react-native';
 
 const PermissionsPage = () => (
   <View style={styles.centered}>
@@ -30,13 +28,49 @@ const NoCameraDeviceError = () => (
   </View>
 );
 
-const Scanner = () => {
-  const [assetNumber, setAssetNumber] = useState('1000826');
+const Scanner = ({route}) => {
   const [isScanning, setIsScanning] = useState(true);
+  const navigation = useNavigation();
+  const fromVerify = route?.params?.verify;
+  const fromTransfer = route?.params?.fromTransfer;
   const codeScanner = useCodeScanner({
-    codeTypes: ['qr', 'ean-13'],
+    codeTypes: ['qr', 'ean-13', 'code-128', 'code-39', 'code-93'],
     onCodeScanned: codes => {
-      Alert.alert(`Scanned ${codes.length} codes!`);
+      if (codes.length > 0 && isScanning) {
+        setIsScanning(false);
+        console.log('scannedValue=>', codes);
+        const scannedValue = codes[0]?.value; // Get the scanned value
+        Alert.alert(
+          'Barcode Detected',
+          `Scanned Asset Number: ${scannedValue}`,
+          [
+            {
+              text: 'Confirm',
+              onPress: () => {
+                if (fromTransfer) {
+                  return navigation.navigate('AssetTransfer', {
+                    assetNumber: scannedValue,
+                  });
+                }
+                if (fromVerify) {
+                  navigation.navigate('AssetVerify', {
+                    assetNumber: scannedValue,
+                  }); // Pass the scanned value
+                } else {
+                  navigation.navigate('AssetDetail', {
+                    assetNumber: scannedValue,
+                  }); // Pass the scanned value
+                }
+              },
+            },
+            {
+              text: 'Scan Again',
+              onPress: () => setIsScanning(true),
+              style: 'cancel',
+            },
+          ],
+        );
+      }
     },
   });
 
@@ -44,63 +78,15 @@ const Scanner = () => {
   const device = useCameraDevice('back');
 
   useEffect(() => {
-    if (!hasPermission && Platform.OS == 'android') {
-      requestAndroidCameraPermission();
+    if (!hasPermission && Platform.OS === 'android') {
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+        title: 'Camera Permission',
+        message: 'This app needs camera access to scan barcodes.',
+        buttonNegative: 'Deny',
+        buttonPositive: 'Allow',
+      });
     }
   }, [hasPermission]);
-
-  const requestAndroidCameraPermission = useCallback(async () => {
-    try {
-      const permissionGranted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: '<your title here>',
-          message: '<your message here>',
-          buttonNegative: 'Deny',
-          buttonPositive: 'Allow',
-        },
-      );
-      // then access permission status
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        // permissons have been accepted - update a useState() here or whatever your usecase is :)
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  }, []);
-
-  // const handleBarCodeScanned = useCallback((scannedBarcodes) => {
-  //   if (scannedBarcodes.length > 0 && isScanning) {
-  //     setIsScanning(false);
-  //     const scannedValue = scannedBarcodes[0].displayValue;
-  //     setAssetNumber(scannedValue);
-  //     Alert.alert(
-  //       'Barcode Detected',
-  //       `Scanned Asset Number: ${scannedValue}`,
-  //       [
-  //         {
-  //           text: 'Scan Again',
-  //           onPress: () => setIsScanning(true),
-  //           style: 'cancel',
-  //         },
-  //         {
-  //           text: 'Confirm',
-  //           onPress: () => {
-  //             // Handle the confirmed barcode value
-  //             console.log('Confirmed asset number:', scannedValue);
-  //           },
-  //         },
-  //       ],
-  //     );
-  //   }
-  // }, [isScanning]);
-
-  // // Watch for barcode updates
-  // React.useEffect(() => {
-  //   if (barcodes) {
-  //     handleBarCodeScanned(barcodes);
-  //   }
-  // }, [barcodes, handleBarCodeScanned]);
 
   if (!hasPermission) return <PermissionsPage />;
   if (device == null) return <NoCameraDeviceError />;
@@ -155,52 +141,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
     padding: 10,
     borderRadius: 5,
-  },
-  // ... keeping your existing styles ...
-  inputView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    width: '100%',
-    marginBottom: 20,
-  },
-  inputContainer: {
-    flex: 1,
-    marginHorizontal: 0,
-  },
-  cameraButton: {
-    padding: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    height: 51,
-    borderColor: COLORS.theme,
-    backgroundColor: COLORS.bgBlue,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cameraIcon: {
-    height: 20,
-    width: 20,
-  },
-  row: {
-    gap: 10,
-    marginVertical: 5,
-    flexDirection: 'row',
-  },
-  labelContainer: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: COLORS.bgGrey,
-    padding: 5,
-    paddingLeft: 12,
-    justifyContent: 'center',
-  },
-  valueContainer: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: COLORS.bgGrey,
-    padding: 8,
-    justifyContent: 'center',
   },
 });
