@@ -1,7 +1,6 @@
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob';
 import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage';
-// import {fetch} from 'react-native-ssl-pinning'
 
 export const COLORS = {
   bgGrey: '#F2F2F2',
