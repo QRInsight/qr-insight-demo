@@ -1,4 +1,4 @@
-package com.qrinsightdemo;
+package com.qrinsightdemo
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -42,4 +42,3 @@ class MainApplication : Application(), ReactApplication {
     }
   }
 }
-

@@ -1,4 +1,4 @@
-package com.qrinsightdemo;
+package com.qrinsightdemo
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
