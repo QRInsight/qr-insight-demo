@@ -31,12 +31,12 @@ const UpdateInfo = () => {
 
   const getInfo = async () => {
     setCredentials({
-      protocol: (await getValueFromStorage('protocol')) || '',
-      host: (await getValueFromStorage('host')) || '',
-      port: (await getValueFromStorage('port')) || '',
-      organizationId: (await getValueFromStorage('organizationId')) || '',
-      clientId: (await getValueFromStorage('clientId')) || '',
-      roleId: (await getValueFromStorage('roleId')) || '',
+      protocol: (await getValueFromStorage('protocol')) || '2443',
+      host: (await getValueFromStorage('host')) || 'bsmlive.erinsight.com',
+      port: (await getValueFromStorage('port')) || 'https',
+      organizationId: (await getValueFromStorage('organizationId')) || '1000020',
+      clientId: (await getValueFromStorage('clientId')) || '1000016',
+      roleId: (await getValueFromStorage('roleId')) || '1000002',
     });
   };
 

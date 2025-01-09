@@ -126,8 +126,6 @@ const Home = () => {
         0,
       )) ||
     0;
-  console.log('assetsByCategory=>', assetsByCategory);
-
   return (
     <Container showBottom={false}>
       <View style={styles.cardRow}>

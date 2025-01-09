@@ -1,13 +1,14 @@
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob';
 import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage';
+import Toast from 'react-native-toast-message';
 
 export const COLORS = {
   bgGrey: '#F2F2F2',
   theme: '#02618E',
   bgBlue: '#DFF1FF',
   white: '#fff',
-  borderColor : "#000"
+  borderColor: '#000',
 };
 
 export const TxtWeight = {
@@ -259,10 +260,23 @@ export const updateProjectLine = async (lineId, updatedData) => {
     if (result) {
       return result; // Return the updated result
     } else {
+      console.log('result==>', result);
       throw new Error('Error updating project line');
     }
   } catch (error) {
-    console.error('Error updating project line:', error);
+    console.log('error=>', error);
+    const errorTitle = error?.title || 'Update Failed';
+    const errorDetail =
+      error?.detail || 'An error occurred while updating the project line.';
+
+    // Show Toast with fallback values
+    Toast.show({
+      type: 'error',
+      text1: error.message,
+      position : "bottom"
+      });
+
+    // console.error('Error updating project line:', error.message);
     throw error;
   }
 };

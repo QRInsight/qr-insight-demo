@@ -19,6 +19,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Navigator from './src/Navigation/navigation';
 import {DropdownProvider} from './src/context/DropdownContext';
+import Toast from 'react-native-toast-message';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -35,6 +36,7 @@ function App() {
       />
       <DropdownProvider>
         <Navigator />
+        <Toast />
       </DropdownProvider>
     </SafeAreaView>
   );

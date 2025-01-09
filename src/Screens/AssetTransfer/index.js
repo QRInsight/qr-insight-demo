@@ -12,8 +12,6 @@ import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
-import {getValueFromStorage} from '../../helpers/asyncStorage';
-import RNFetchBlob from 'rn-fetch-blob';
 import {Dropdown} from 'react-native-element-dropdown';
 import {Btn} from '../../components/Btn';
 import {DropdownContext} from '../../context/DropdownContext';

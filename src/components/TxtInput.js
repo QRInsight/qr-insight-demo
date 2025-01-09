@@ -19,6 +19,7 @@ export const Input = ({
   setValue,
   phoneNumber,
   autoFocus,
+  onEndEditing,
   ...inputProps
 }) => {
   return (
@@ -61,6 +62,7 @@ export const Input = ({
           keyboardType={keyboardType}
           autoFocus={autoFocus}
           value={value}
+          onEndEditing={onEndEditing}
           onChangeText={onChange}
           {...inputProps}
         />

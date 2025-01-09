@@ -40,36 +40,22 @@ const Scanner = ({route}) => {
         setIsScanning(false);
         console.log('scannedValue=>', codes);
         const scannedValue = codes[0]?.value; // Get the scanned value
-        Alert.alert(
-          'Barcode Detected',
-          `Scanned Asset Number: ${scannedValue}`,
-          [
-            {
-              text: 'Confirm',
-              onPress: () => {
-                if (fromTransfer) {
-                  return navigation.navigate('AssetTransfer', {
-                    assetNumber: scannedValue,
-                  });
-                }
-                if (fromVerify) {
-                  navigation.navigate('AssetVerify', {
-                    assetNumber: scannedValue,
-                  }); // Pass the scanned value
-                } else {
-                  navigation.navigate('AssetDetail', {
-                    assetNumber: scannedValue,
-                  }); // Pass the scanned value
-                }
-              },
-            },
-            {
-              text: 'Scan Again',
-              onPress: () => setIsScanning(true),
-              style: 'cancel',
-            },
-          ],
-        );
+        if (scannedValue) {
+          if (fromTransfer) {
+            return navigation.replace('AssetTransfer', {
+              assetNumber: scannedValue,
+            });
+          }
+          if (fromVerify) {
+            return navigation.replace('AssetVerify', {
+              assetNumber: scannedValue,
+            }); // Pass the scanned value
+          } else {
+            return navigation.replace('AssetDetail', {
+              assetNumber: scannedValue,
+            }); // Pass the scanned value
+          }
+        }
       }
     },
   });
