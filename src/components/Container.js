@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,12 +7,32 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {COLORS, Space, TxtWeight} from '../Constants';
 import {images} from '../assets';
 import Txt from '../components/Txt';
+import {useNavigation} from '@react-navigation/native';
 
 const Container = ({title = 'Home', showBottom = true, children, onBack}) => {
+  const navigation = useNavigation();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -39,10 +59,16 @@ const Container = ({title = 'Home', showBottom = true, children, onBack}) => {
         <ScrollView style={{paddingHorizontal: Space.LG, marginTop: 100}}>
           {children}
         </ScrollView>
-        {showBottom && (
+        {showBottom && !isKeyboardVisible && (
           <View>
             <View style={styles.bottomCircleWrapper}>
               <TouchableOpacity
+                onPress={() => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Home'}],
+                  });
+                }}
                 activeOpacity={0.8}
                 style={styles.bottomCircleButton}>
                 <Image

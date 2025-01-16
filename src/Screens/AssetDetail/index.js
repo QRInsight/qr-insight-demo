@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
 import {images} from '../../assets';
@@ -7,8 +14,11 @@ import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 
-
-
+const notIclude = [
+  'Attribute Set Instance',
+  'Organization',
+  'Asset Addition',
+];
 
 const AssetDetail = () => {
   const [assetData, setAssetData] = useState(null);
@@ -20,14 +30,16 @@ const AssetDetail = () => {
   useEffect(() => {
     if (route.params?.assetNumber) {
       setAssetNumber(route.params.assetNumber);
-      handleFetchAssetDetails(route.params.assetNumber);
+      handleFetchAssetDetails();
     }
   }, [route.params]);
 
-  const handleFetchAssetDetails = async assetNumber => {
+  const handleFetchAssetDetails = async () => {
     setLoading(true);
     try {
-      const data = await fetchAssetDetailsById(assetNumber); // Fetch data from API
+      const data = await fetchAssetDetailsById(
+        route?.params?.assetNumber || assetNumber,
+      ); // Fetch data from API
       setAssetData(data);
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to fetch asset details.');
@@ -45,7 +57,18 @@ const AssetDetail = () => {
           value={assetNumber}
           onChangeText={text => setAssetNumber(text)}
           containerSyle={styles.inputContainer}
+          onEndEditing={() => {
+            handleFetchAssetDetails();
+          }}
         />
+        {assetNumber.length === 8 ? (
+          <TouchableOpacity
+            style={styles.cameraButton}
+            onPress={() => handleFetchAssetDetails()}
+            disabled={loading}>
+            <Image source={images.search} style={styles.cameraIcon} />
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity
           style={styles.cameraButton}
           onPress={() => navigation.navigate('Scanner')}
@@ -55,26 +78,35 @@ const AssetDetail = () => {
       </View>
 
       {/* Displaying Asset Details */}
+      {loading ? (
+        <ActivityIndicator
+          size={'large'}
+          style={{alignSelf: 'center', marginVertical: 12}}
+        />
+      ) : null}
       {assetData ? (
         <View>
-          {Object.keys(assetData).map((key, index) => (
-            <View key={index} style={styles.row}>
-              <View style={styles.labelContainer}>
-                <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                  {typeof assetData[key] === 'object'
-                    ? assetData[key]?.propertyLabel || '-'
-                    : assetData[key] || '-'}
-                </Txt>
+          {Object.keys(assetData)?.map((key, index) =>
+            typeof assetData[key] === 'object' &&
+            !notIclude.includes(assetData[key]?.propertyLabel) ? (
+              <View key={index} style={styles.row}>
+                <View style={styles.labelContainer}>
+                  <Txt mt={3} color="#000" weight={TxtWeight.Light}>
+                    {typeof assetData[key] === 'object'
+                      ? assetData[key]?.propertyLabel || '-'
+                      : assetData[key] || '-'}
+                  </Txt>
+                </View>
+                <View style={styles.valueContainer}>
+                  <Txt>
+                    {typeof assetData[key] === 'object'
+                      ? assetData[key]?.identifier || '-'
+                      : assetData[key] || '-'}
+                  </Txt>
+                </View>
               </View>
-              <View style={styles.valueContainer}>
-                <Txt>
-                  {typeof assetData[key] === 'object'
-                    ? assetData[key]?.identifier || '-'
-                    : assetData[key] || '-'}
-                </Txt>
-              </View>
-            </View>
-          ))}
+            ) : null,
+          )}
         </View>
       ) : (
         <Txt mt={10} color="#777" center>
@@ -128,7 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   valueContainer: {
-    flex: 1,
+    flex: 1.2,
     borderRadius: 10,
     backgroundColor: COLORS.bgGrey,
     padding: 8,

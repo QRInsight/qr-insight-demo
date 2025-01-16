@@ -13,4 +13,6 @@ export const images = {
   camera: require('./images/camera.png'),
   right: require('./images/right.png'),
   wrong: require('./images/wrong.png'),
+  search: require('./images/search.png'),
+  
 };

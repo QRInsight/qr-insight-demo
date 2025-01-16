@@ -16,9 +16,9 @@ const UpdateInfo = () => {
 
   // State for credentials
   const [credentials, setCredentials] = useState({
-    protocol: '2443',
+    protocol: 'https',
     host: 'bsmlive.erinsight.com',
-    port: 'https',
+    port: '2443',
     organizationId: '1000020',
     clientId: '1000016',
     roleId: '1000002',
@@ -30,23 +30,29 @@ const UpdateInfo = () => {
   }, []);
 
   const getInfo = async () => {
-    setCredentials({
-      protocol: (await getValueFromStorage('protocol')) || '2443',
-      host: (await getValueFromStorage('host')) || 'bsmlive.erinsight.com',
-      port: (await getValueFromStorage('port')) || 'https',
-      organizationId: (await getValueFromStorage('organizationId')) || '1000020',
-      clientId: (await getValueFromStorage('clientId')) || '1000016',
-      roleId: (await getValueFromStorage('roleId')) || '1000002',
-    });
+    // setCredentials({
+    //   protocol: (await getValueFromStorage('protocol')) || 'https',
+    //   host: (await getValueFromStorage('host')) || 'bsmlive.erinsight.com',
+    //   port: (await getValueFromStorage('port')) || '2443',
+    //   organizationId:
+    //     (await getValueFromStorage('organizationId')) || '1000020',
+    //   clientId: (await getValueFromStorage('clientId')) || '1000016',
+    //   roleId: (await getValueFromStorage('roleId')) || '1000002',
+    // });
   };
 
   // Update all keys to local storage
   const updateCredentials = async () => {
-   await addKeyToStorage('host', 'bsmlive.erinsight.com');
-    for (const [key, value] of Object.entries(credentials)) {
-      console.log('credentials=>', credentials);
-      await addKeyToStorage(key, value);
-    }
+    // for (const [key, value] of Object.entries(credentials)) {
+    //   await addKeyToStorage(key, value);
+    // }
+
+    await getValueFromStorage('protocol');
+    await getValueFromStorage('host');
+    await getValueFromStorage('port');
+    await getValueFromStorage('organizationId');
+    await getValueFromStorage('clientId');
+    await getValueFromStorage('roleId');
     navigation.navigate('Login');
   };
 
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
-    height: 40,
+    // height: 40,
   },
   btn: {
     backgroundColor: '#2980b9',

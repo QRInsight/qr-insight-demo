@@ -244,6 +244,8 @@ export const updateProjectLine = async (lineId, updatedData) => {
     const port = await getValueFromStorage('port');
     const baseUrl = `${protocol}://${host}:${port}`;
     const url = `${baseUrl}/api/v1/models/ER_AssetVerificationLine/${lineId}`;
+    console.log('lineId=>', lineId);
+    console.log('url=>', url);
 
     const response = await RNFetchBlob.config({trusty: true}).fetch(
       'PUT',
@@ -253,16 +255,18 @@ export const updateProjectLine = async (lineId, updatedData) => {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      JSON.stringify(updatedData),
+      JSON.stringify({Status: true}),
     );
 
     const result = await response.json();
     if (result) {
-      return result; // Return the updated result
-    } else {
       console.log('result==>', result);
-      throw new Error('Error updating project line');
-    }
+      return result; // Return the updated result
+    } 
+    // else {
+    //   console.log('result==>', result);
+    //   throw new Error('Error updating project line');
+    // }
   } catch (error) {
     console.log('error=>', error);
     const errorTitle = error?.title || 'Update Failed';
@@ -273,8 +277,8 @@ export const updateProjectLine = async (lineId, updatedData) => {
     Toast.show({
       type: 'error',
       text1: error.message,
-      position : "bottom"
-      });
+      position: 'bottom',
+    });
 
     // console.error('Error updating project line:', error.message);
     throw error;

@@ -72,6 +72,36 @@ const AssetCategoryTable = ({data}) => {
   );
 };
 
+const AssetProjectTable = ({data}) => {
+  return (
+    <View style={styles.tableContainer}>
+      <View style={styles.tableHeaderRow}>
+        <Txt
+          size={14}
+          weight={TxtWeight.Regular}
+          style={[styles.tableHeader, {flex: 2}]}>
+          Name
+        </Txt>
+        <Txt size={14} weight={TxtWeight.Regular} style={styles.tableHeader}>
+          Quantity
+        </Txt>
+      </View>
+      {data &&
+        data['Projects'] &&
+        Object.values(data['Projects']).map((project, index) => {
+          return (
+            <View key={index} style={styles.tableRow}>
+              <Txt style={[styles.tableCell, {flex: 2}]}>{project.Name}</Txt>
+              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+                {project.Qty}
+              </Txt>
+            </View>
+          );
+        })}
+    </View>
+  );
+};
+
 const Home = () => {
   const navigation = useNavigation();
   const [assetsByCategory, setAssetsByCategory] = useState({});
@@ -104,13 +134,9 @@ const Home = () => {
     },
   ];
 
- 
-
   useEffect(() => {
     getInfo();
   }, []);
-
-  
 
   const getInfo = async () => {
     const info = await fetchHomeScreenData();
@@ -167,10 +193,14 @@ const Home = () => {
         <Txt color={COLORS.white} size={20} center>
           Total Project |{'  '}
           <Txt weight={TxtWeight.Bold} color={COLORS.white} size={25}>
-            5
+            {assetsByCategory && assetsByCategory['Projects']
+              ? Object.values(assetsByCategory['Projects']).length
+              : ''}
           </Txt>
         </Txt>
       </View>
+
+      <AssetProjectTable title="Total Projects" data={assetsByCategory} />
     </Container>
   );
 };

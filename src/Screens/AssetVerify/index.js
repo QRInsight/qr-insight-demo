@@ -26,14 +26,17 @@ import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 import {images} from '../../assets';
+import Toast from 'react-native-toast-message';
+import {useNavigation} from '@react-navigation/native';
 
 const AssetVerify = () => {
+  const navigation = useNavigation();
   const [assetNumber, setAssetNumber] = useState(''); // Input value for asset number
   const [projects, setProjects] = useState([]); // Projects list
   const [auditItems, setAuditItems] = useState([]); // Audit items list
   const [selectedProject, setSelectedProject] = useState(null); // Selected project
   const [loading, setLoading] = useState(false); // Loading state
-  const [isScanning, setIsScanning] = useState(true); // Camera scanning state
+  const [isScanning, setIsScanning] = useState(false); // Camera scanning state
   const [isCameraVisible, setIsCameraVisible] = useState(false); // Toggle camera visibility
   const [isFocus, setIsFocus] = useState(false);
 
@@ -98,16 +101,40 @@ const AssetVerify = () => {
   const auditChosenItem = async () => {
     try {
       setLoading(true);
-      console.log('assetNumber=>', assetNumber);
-      // console.log('auditItems==>', auditItems);
-      await updateProjectLine(assetNumber, {Status: true});
-      await fetchAuditItems();
-      setLoading(false);
+      const auditItem = auditItems.find(
+        data =>
+          data?.A_Asset_ID &&
+          data?.A_Asset_ID?.identifier?.includes(assetNumber.toString()),
+      )?.id;
+      if (!auditItem)
+        return Toast.show({
+          position: 'bottom',
+          type: 'error',
+          text1: 'Project ID not found.',
+        });
+      const updated = await updateProjectLine(auditItem, {Status: true});
+      if (!updated)
+        return Toast.show({
+          position: 'bottom',
+          type: 'error',
+          text1: 'Project ID not found.',
+        });
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Product Found Successfully.',
+      });
+      await fetchAuditItems(selectedProject);
     } catch (error) {
-      console.error('Error fetching audit items:', error);
+      console.error('Error on the front fetching audit items:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCamera = () => {
+    setIsCameraVisible(prevState => !prevState);
+    setIsScanning(!isCameraVisible); // Reset scanning state when toggling the camera
   };
 
   if (!hasPermission) {
@@ -119,7 +146,7 @@ const AssetVerify = () => {
   }
 
   return (
-    <Container title="Asset Audit">
+    <Container title="Asset Audit" onBack={() => navigation.goBack()}>
       <View style={styles.inputView}>
         <Input
           placeholder="Asset Number"
@@ -132,9 +159,7 @@ const AssetVerify = () => {
             auditChosenItem();
           }}
         />
-        <TouchableOpacity
-          style={styles.cameraButton}
-          onPress={() => setIsCameraVisible(!isCameraVisible)}>
+        <TouchableOpacity style={styles.cameraButton} onPress={toggleCamera}>
           <Image source={images.camera} style={styles.cameraIcon} />
         </TouchableOpacity>
       </View>
@@ -143,7 +168,7 @@ const AssetVerify = () => {
         <Camera
           style={styles.camera}
           device={device}
-          isActive={isScanning}
+          isActive={isCameraVisible} // Only active when the camera is visible
           codeScanner={codeScanner}
         />
       )}
@@ -151,7 +176,9 @@ const AssetVerify = () => {
       <Dropdown
         data={projects?.map(project => ({
           label:
-          project?.C_Project_ID?.id + ' - ' + project?.C_Project_ID?.identifier,
+            project?.C_Project_ID?.id +
+            ' - ' +
+            project?.C_Project_ID?.identifier,
           value: project.id,
         }))}
         placeholder={!isFocus ? 'Select Project' : '...'}
@@ -178,7 +205,9 @@ const AssetVerify = () => {
           auditItems.map((item, index) => (
             <View key={index} style={styles.row}>
               <Txt style={styles.txt}>{item?.A_Asset_ID?.id || 'N/A'}</Txt>
-              <Txt style={styles.txt}>
+              <Txt
+                size={12}
+                style={[styles.txt, {flex: 2.4, paddingRight: 10}]}>
                 {item?.A_Asset_ID?.identifier || 'N/A'}
               </Txt>
               <Image
@@ -241,6 +270,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    borderBottomColor: COLORS.theme,
+    borderBottomWidth: 0.5,
+    padding: 5,
   },
   txt: {
     flex: 1,
@@ -252,5 +284,6 @@ const styles = StyleSheet.create({
   statusIcon: {
     width: 20,
     height: 20,
+    resizeMode: 'contain',
   },
 });

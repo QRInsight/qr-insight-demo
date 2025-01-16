@@ -67,7 +67,11 @@ const apiEndpoints = [
 ];
 
 const AssetTransfer = ({route}) => {
-  const {dropdownData, loading: dropdownLoading} = useContext(DropdownContext);
+  const {
+    dropdownData,
+    fetchDropdownData,
+    loading: dropdownLoading,
+  } = useContext(DropdownContext);
   console.log('dropdownData=>', dropdownData);
   const [assetData, setAssetData] = useState(null); // State to store API data
   const [loading, setLoading] = useState(false); // Loading state
@@ -77,6 +81,17 @@ const AssetTransfer = ({route}) => {
   const [isDataFetched, setIsDataFetched] = useState(false); // Track if data is fetched
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    // Trigger fetch if any dropdown data is missing
+    const isDataMissing = apiEndpoints.some(
+      endpoint => !dropdownData[endpoint.label],
+    );
+
+    if (isDataMissing) {
+      fetchDropdownData();
+    }
+  }, [dropdownData]);
 
   useEffect(() => {
     if (route.params?.assetNumber) {
@@ -161,8 +176,19 @@ const AssetTransfer = ({route}) => {
           placeholder="Asset Number"
           value={assetNumber}
           onChangeText={text => setAssetNumber(text)}
+          onEndEditing={event => {
+            handleFetchAssetDetails();
+          }}
           containerSyle={styles.inputContainer}
         />
+        {assetNumber.length === 8 ? (
+          <TouchableOpacity
+            style={styles.cameraButton}
+            onPress={() => handleFetchAssetDetails()}
+            disabled={loading}>
+            <Image source={images.search} style={styles.cameraIcon} />
+          </TouchableOpacity>
+        ) : null}
         <TouchableOpacity
           style={styles.cameraButton}
           onPress={() => navigation.navigate('Scanner', {fromTransfer: true})}
