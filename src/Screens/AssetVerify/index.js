@@ -21,6 +21,7 @@ import {
   fetchProjects,
   fetchProjectLinesById,
   updateProjectLine,
+  TxtWeight,
 } from '../../Constants';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
@@ -197,7 +198,34 @@ const AssetVerify = () => {
           fetchAuditItems(item.value);
         }}
       />
-
+      {auditItems && auditItems.length ? (
+        <View style={styles.statsRow}>
+          <View style={[styles.boxInfo, {flex: 1.3}]}>
+            <Txt size={13} center>
+              Total Assets
+            </Txt>
+            <Txt size={13} weight={TxtWeight.Bold} center>
+              {auditItems.length}
+            </Txt>
+          </View>
+          <View style={styles.boxInfo}>
+            <Txt size={13} center>
+              Scanned
+            </Txt>
+            <Txt size={13} weight={TxtWeight.Bold} center>
+              {auditItems.filter(data => data.Status == true)?.length || 0}
+            </Txt>
+          </View>
+          <View style={styles.boxInfo}>
+            <Txt size={13} center>
+              Left
+            </Txt>
+            <Txt size={13} weight={TxtWeight.Bold} center>
+              {auditItems.filter(data => data.Status == false)?.length || 0}
+            </Txt>
+          </View>
+        </View>
+      ) : null}
       <View style={styles.tableContainer}>
         {loading ? (
           <ActivityIndicator size="large" color={COLORS.theme} />
@@ -231,6 +259,13 @@ const styles = StyleSheet.create({
     gap: 10,
     width: '100%',
     marginBottom: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    gap: 8,
+    marginTop: 8,
+    overflow: 'hidden',
   },
   inputContainer: {
     flex: 1,
@@ -285,5 +320,18 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     resizeMode: 'contain',
+  },
+  boxInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingHorizontal: 7,
+    backgroundColor: COLORS.bgGrey,
+    padding: 5,
+
+  },
+  bg: {
+    backgroundColor: COLORS.bgBlue,
+    padding: 5,
   },
 });
