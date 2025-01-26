@@ -14,10 +14,23 @@ import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 
-const notIclude = [
-  'Attribute Set Instance',
-  'Organization',
-  'Asset Addition',
+const notIclude = ['Attribute Set Instance', 'Organization', 'Asset Addition'];
+
+const sequence = [
+  'C_Project_ID', // Project
+  'M_Warehouse_ID', // Warehouse
+  'M_Locator_ID', // Locator
+  'InventoryNo', // Asset Code
+  'Name', // Asset Name
+  'Description', // Asset Description
+  'A_Asset_Group_ID', // Asset Group
+  'Locationdescription', // Asset Location
+  'EmployeeName', // Employee Name (assume key exists or handle dynamically)
+  'Department', // Department (assume key exists or handle dynamically)
+  'RepairableStautus', // Serviceable Status
+  'CreatedBy', // Created By
+  'UpdatedBy', // Updated By
+  'AD_Client_ID', // Tenant
 ];
 
 const AssetDetail = () => {
@@ -86,27 +99,36 @@ const AssetDetail = () => {
       ) : null}
       {assetData ? (
         <View>
-          {Object.keys(assetData)?.map((key, index) =>
-            typeof assetData[key] === 'object' &&
-            !notIclude.includes(assetData[key]?.propertyLabel) ? (
-              <View key={index} style={styles.row}>
-                <View style={styles.labelContainer}>
-                  <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                    {typeof assetData[key] === 'object'
-                      ? assetData[key]?.propertyLabel || '-'
-                      : assetData[key] || '-'}
-                  </Txt>
+          {sequence.map((key, index) => {
+            if (assetData[key] && typeof assetData[key] === 'object') {
+              return (
+                <View key={index} style={styles.row}>
+                  <View style={styles.labelContainer}>
+                    <Txt mt={3} color="#000" weight={TxtWeight.Light}>
+                      {assetData[key]?.propertyLabel || '-'}
+                    </Txt>
+                  </View>
+                  <View style={styles.valueContainer}>
+                    <Txt>{assetData[key]?.identifier || '-'}</Txt>
+                  </View>
                 </View>
-                <View style={styles.valueContainer}>
-                  <Txt>
-                    {typeof assetData[key] === 'object'
-                      ? assetData[key]?.identifier || '-'
-                      : assetData[key] || '-'}
-                  </Txt>
+              );
+            } else if (assetData[key]) {
+              return (
+                <View key={index} style={styles.row}>
+                  <View style={styles.labelContainer}>
+                    <Txt mt={3} color="#000" weight={TxtWeight.Light}>
+                      {key || '-'}
+                    </Txt>
+                  </View>
+                  <View style={styles.valueContainer}>
+                    <Txt>{assetData[key] || '-'}</Txt>
+                  </View>
                 </View>
-              </View>
-            ) : null,
-          )}
+              );
+            }
+            return null;
+          })}
         </View>
       ) : (
         <Txt mt={10} color="#777" center>

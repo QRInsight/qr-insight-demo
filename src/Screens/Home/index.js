@@ -5,7 +5,9 @@ import {
   Image,
   Dimensions,
   FlatList,
+  Modal,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import {COLORS, Space, TxtWeight, fetchHomeScreenData} from '../../Constants';
 import Container from '../../components/Container';
@@ -72,7 +74,7 @@ const AssetCategoryTable = ({data}) => {
   );
 };
 
-const AssetProjectTable = ({data}) => {
+const AssetProjectTable = ({data, onRowPress}) => {
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeaderRow}>
@@ -88,16 +90,18 @@ const AssetProjectTable = ({data}) => {
       </View>
       {data &&
         data['Projects'] &&
-        Object.values(data['Projects']).map((project, index) => {
-          return (
-            <View key={index} style={styles.tableRow}>
-              <Txt style={[styles.tableCell, {flex: 2}]}>{project.Name}</Txt>
-              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
-                {project.Qty}
-              </Txt>
-            </View>
-          );
-        })}
+        Object.values(data['Projects']).map((project, index) => (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            key={index}
+            style={styles.tableRow}
+            onPress={() => onRowPress(project)}>
+            <Txt style={[styles.tableCell, {flex: 2}]}>{project.Name}</Txt>
+            <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+              {project.Qty}
+            </Txt>
+          </TouchableOpacity>
+        ))}
     </View>
   );
 };
@@ -105,34 +109,8 @@ const AssetProjectTable = ({data}) => {
 const Home = () => {
   const navigation = useNavigation();
   const [assetsByCategory, setAssetsByCategory] = useState({});
-
-  const locations = [
-    {
-      name: 'Sarai',
-      assetCategories: [
-        {category: 'A', quantity: 30},
-        {category: 'B', quantity: 20},
-        {category: 'C', quantity: 40},
-        {category: 'D', quantity: 90},
-      ],
-    },
-    {
-      name: 'Mandi',
-      assetCategories: [],
-    },
-    {
-      name: 'Gujjar Khan',
-      assetCategories: [],
-    },
-    {
-      name: 'Lahore',
-      assetCategories: [],
-    },
-    {
-      name: 'NMC Lahore',
-      assetCategories: [],
-    },
-  ];
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     getInfo();
@@ -152,6 +130,47 @@ const Home = () => {
         0,
       )) ||
     0;
+
+  const handleRowPress = project => {
+    setSelectedProject(project);
+    setModalVisible(true);
+  };
+
+  const renderProjectDetails = () => {
+    if (!selectedProject) return null;
+
+    const projectGroup = selectedProject.Group || 'Unknown Group';
+    const relatedCategories =
+      assetsByCategory.Groups &&
+      Object.entries(assetsByCategory.Groups).filter(([key]) =>
+        key.includes(projectGroup),
+      );
+
+    console.log('selectedProject=>', selectedProject);
+    console.log('selectedProject=>', Object.values(selectedProject));
+    console.log('Group=>', selectedProject?.['Group']);
+
+    return (
+      <View style={styles.modalContent}>
+        <Txt weight={TxtWeight.Bold} size={20} mb={15}>
+          {selectedProject.Name} - Details
+        </Txt>
+        {/* {relatedCategories && relatedCategories.length > 0 ? (
+          Object.values(selectedProject?.Groups).map((data, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Txt style={[styles.tableCell, {flex: 2}]}>{data?.Group}</Txt>
+              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+                {data?.Qty}
+              </Txt>
+            </View>
+          ))
+        ) : (
+          <Txt>No categories available for this project.</Txt>
+        )} */}
+      </View>
+    );
+  };
+
   return (
     <Container showBottom={false}>
       <View style={styles.cardRow}>
@@ -200,7 +219,28 @@ const Home = () => {
         </Txt>
       </View>
 
-      <AssetProjectTable title="Total Projects" data={assetsByCategory} />
+      <AssetProjectTable
+        title="Total Projects"
+        data={assetsByCategory}
+        onRowPress={handleRowPress}
+      />
+
+      {/* Modal for Project Details */}
+      {/* <Modal
+        animationType="slide"
+        visible={isModalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalWrapper}>
+          <View style={styles.modalContainer}>
+            <ScrollView>{renderProjectDetails()}</ScrollView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}>
+              <Txt>Close</Txt>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal> */}
     </Container>
   );
 };

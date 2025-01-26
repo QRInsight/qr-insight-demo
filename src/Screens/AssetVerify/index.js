@@ -230,9 +230,16 @@ const AssetVerify = () => {
         {loading ? (
           <ActivityIndicator size="large" color={COLORS.theme} />
         ) : (
-          auditItems.map((item, index) => (
+          [
+            ...auditItems.filter(data => data.Status == true),
+            ...auditItems.filter(data => data.Status == false),
+          ].map((item, index) => (
             <View key={index} style={styles.row}>
-              <Txt style={styles.txt}>{item?.A_Asset_ID?.id || 'N/A'}</Txt>
+              <Txt style={styles.txt}>
+                {item?.A_Asset_ID?.identifier?.split('_')[0] ||
+                  item?.A_Asset_ID?.id ||
+                  'N/A'}
+              </Txt>
               <Txt
                 size={12}
                 style={[styles.txt, {flex: 2.4, paddingRight: 10}]}>
@@ -328,7 +335,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     backgroundColor: COLORS.bgGrey,
     padding: 5,
-
   },
   bg: {
     backgroundColor: COLORS.bgBlue,
