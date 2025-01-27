@@ -52,39 +52,7 @@ const Container = ({title = 'Home', showBottom = true, children, onBack}) => {
         <TouchableOpacity style={styles.headerButton}></TouchableOpacity>
       </View>
 
-      <ImageBackground
-        source={images.whiteBG}
-        resizeMode="stretch"
-        style={styles.backgroundImage}>
-        <ScrollView style={{paddingHorizontal: Space.LG, marginTop: 100}}>
-          {children}
-        </ScrollView>
-        {showBottom && !isKeyboardVisible && (
-          <View>
-            <View style={styles.bottomCircleWrapper}>
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.reset({
-                    index: 0,
-                    routes: [{name: 'Home'}],
-                  });
-                }}
-                activeOpacity={0.8}
-                style={styles.bottomCircleButton}>
-                <Image
-                  source={images.home_icon}
-                  style={styles.bottomCircleIcon}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <ImageBackground
-              source={images.bottom_bg}
-              resizeMode="stretch"
-              style={styles.bottomImageBackground}></ImageBackground>
-          </View>
-        )}
-      </ImageBackground>
+      <ScrollView>{children}</ScrollView>
     </SafeAreaView>
   );
 };
@@ -92,11 +60,12 @@ const Container = ({title = 'Home', showBottom = true, children, onBack}) => {
 export default Container;
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: COLORS.bgBlue, flex: 1},
+  container: {flex: 1},
   header: {
     height: 60,
     flexDirection: 'row',
-    zIndex: 12,
+    borderBottomColor: COLORS.borderColor,
+    borderBottomWidth: 0.5,
     alignItems: 'center',
   },
   headerButton: {

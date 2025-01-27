@@ -55,7 +55,7 @@ export default Txt;
 
 const styles = StyleSheet.create({
   default: {
-    color: COLORS.theme,
+    color: COLORS.borderColor,
     fontSize  : 16
     // lineHeight : 27.4
   },
