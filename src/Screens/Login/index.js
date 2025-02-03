@@ -13,8 +13,8 @@ import Toast from 'react-native-toast-message';
 import {useNavigation} from '@react-navigation/native';
 
 const LoginScreen = () => {
-  const [phoneNumber, setPhoneNumber] = useState('+92');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('+923132933803');
+  const [password, setPassword] = useState('123456');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 

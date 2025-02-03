@@ -20,6 +20,7 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Navigator from './src/Navigation/navigation';
 import {DropdownProvider} from './src/context/DropdownContext';
 import Toast from 'react-native-toast-message';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -34,10 +35,12 @@ function App() {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <DropdownProvider>
-        <Navigator />
-        <Toast />
-      </DropdownProvider>
+      <GestureHandlerRootView>
+        <DropdownProvider>
+          <Navigator />
+          <Toast />
+        </DropdownProvider>
+      </GestureHandlerRootView>
     </SafeAreaView>
   );
 }
