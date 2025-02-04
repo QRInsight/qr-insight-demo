@@ -31,9 +31,9 @@ export const CartProvider = ({children}) => {
     }
   };
 
-  const clearCart = async cart => {
+  const clearCart = async () => {
     try {
-      await AsyncStorage.setItem('cart', null);
+      await AsyncStorage.removeItem('cart');
       setCartItems([]);
     } catch (error) {
       console.error('Error saving cart:', error);

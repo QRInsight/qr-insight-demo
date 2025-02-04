@@ -17,6 +17,8 @@ import Ionicons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useCart} from '../../context/CartContext';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import dayjs from 'dayjs';
+import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 const CartScreen = () => {
   const {cartItems, removeFromCart, addToCart, clearCart} = useCart();
@@ -26,6 +28,7 @@ const CartScreen = () => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState(0);
+  const navigation = useNavigation();
   const [routes] = useState([
     {key: 'cart', title: 'Cart Items'},
     {key: 'checkout', title: 'Checkout'},
@@ -67,12 +70,7 @@ const CartScreen = () => {
         customer: customerId,
         discount: 0,
         paidPayment: 0, // No payment during checkout
-        payments: [
-          {
-            method: paymentMethod || 'Cash',
-            amount: 0, // No payment at checkout stage
-          },
-        ],
+        payments: [],
         salesDate: dayjs().format('YYYY-MM-DDTHH:mm:ssZ'), // Current timestamp
         orderStatus: 'Pending',
         orderTax: 0,
@@ -97,9 +95,12 @@ const CartScreen = () => {
       console.log('response.data=>', response.data);
 
       if (!response.data.error) {
-        Alert.alert('Order placed successfully');
+        Toast.show({
+          type: 'success',
+          text1: 'Order Placed Successfully',
+        });
         clearCart();
-        AsyncStorage.removeItem('cart'); // Clear cart after checkout
+        navigation.navigate('Profile');
       }
     } catch (error) {
       console.log('response.data=>', error?.response?.data);
