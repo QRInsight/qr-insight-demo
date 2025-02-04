@@ -1,31 +1,21 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {ActivityIndicator, View} from 'react-native';
+import {ActivityIndicator, View, StyleSheet} from 'react-native';
 import Home from '../Screens/Home';
 import Login from '../Screens/Login';
+import CompanyDetail from '../Screens/CompanyProducts';
+import LikedProducts from '../Screens/LikedProducts';
+import CartScreen from '../Screens/Cart';
+import ProfileScreen from '../Screens/Profile';
+import { UserContext } from '../context/UserContext';
 
 const Stack = createNativeStackNavigator();
 
 function Navigator() {
-  const [isLoggedIn, setIsLoggedIn] = useState(null);
+  const {user, isLoading} = useContext(UserContext);
 
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
-
-  const checkLoginStatus = async () => {
-    try {
-      const userData = await AsyncStorage.getItem('userData');
-      setIsLoggedIn(userData ? true : false);
-    } catch (error) {
-      console.error('Error checking login status:', error);
-      setIsLoggedIn(false);
-    }
-  };
-
-  if (isLoggedIn === null) {
+  if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -36,8 +26,14 @@ function Navigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {isLoggedIn ? (
-          <Stack.Screen name="Home" component={Home} />
+        {user ? (
+          <>
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="CompanyDetail" component={CompanyDetail} />
+            <Stack.Screen name="LikedProducts" component={LikedProducts} />
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+          </>
         ) : (
           <Stack.Screen name="Login" component={Login} />
         )}
@@ -46,12 +42,12 @@ function Navigator() {
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
+});
 
 export default Navigator;

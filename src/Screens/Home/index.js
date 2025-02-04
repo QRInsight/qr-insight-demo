@@ -13,6 +13,7 @@ import Txt from '../../components/Txt';
 import {COLORS, TxtWeight} from '../../Constants';
 import ReanimatedCarousel from 'react-native-reanimated-carousel';
 import Ionicons from 'react-native-vector-icons/MaterialCommunityIcons'; // ✅ Correct Import
+import Header from '../../components/Header';
 
 const {width} = Dimensions.get('window');
 
@@ -61,26 +62,7 @@ const Home = () => {
   return (
     <View style={styles.container}>
       {/* 🔹 Header */}
-      <View style={styles.header}>
-        <Txt weight={TxtWeight.Bold} style={styles.logo}>
-          POS
-        </Txt>
-        <View style={styles.icons}>
-          <TouchableOpacity>
-            <Ionicons name="add-shopping-cart" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="cards-heart-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons
-              name="account-supervisor-circle-outline"
-              size={24}
-              color="black"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header />
 
       {/* 🔹 Banner Carousel */}
       <View style={{height: 200}}>

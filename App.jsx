@@ -18,9 +18,10 @@ import {
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Navigator from './src/Navigation/navigation';
-import {DropdownProvider} from './src/context/DropdownContext';
 import Toast from 'react-native-toast-message';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {CartProvider} from './src/context/CartContext';
+import {UserProvider} from './src/context/UserContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -36,10 +37,12 @@ function App() {
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <GestureHandlerRootView>
-        <DropdownProvider>
-          <Navigator />
-          <Toast />
-        </DropdownProvider>
+        <UserProvider>
+          <CartProvider>
+            <Navigator />
+            <Toast />
+          </CartProvider>
+        </UserProvider>
       </GestureHandlerRootView>
     </SafeAreaView>
   );

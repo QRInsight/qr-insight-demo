@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,12 +7,13 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import {useNavigation} from '@react-navigation/native';
+import {UserContext} from '../../context/UserContext';
 
 const LoginScreen = () => {
+  const {loginUser} = useContext(UserContext);
   const [phoneNumber, setPhoneNumber] = useState('+923132933803');
   const [password, setPassword] = useState('123456');
   const [loading, setLoading] = useState(false);
@@ -43,11 +44,9 @@ const LoginScreen = () => {
         {phoneNumber, password},
       );
 
-      console.log('response=>', response.data.data);
-
       if (!response.data.error) {
         const userData = response.data.data;
-        await AsyncStorage.setItem('userData', JSON.stringify(userData));
+        loginUser(userData);
 
         Toast.show({
           type: 'success',
@@ -86,8 +85,7 @@ const LoginScreen = () => {
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
-        placeholder="Enter phone number e.g. 3123456789"
-        maxLength={13}
+        placeholder="Enter phone number"
         placeholderTextColor={'#ccc'}
       />
 
@@ -96,8 +94,8 @@ const LoginScreen = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        placeholderTextColor={'#ccc'}
         placeholder="Enter your password"
+        placeholderTextColor={'#ccc'}
       />
 
       <TouchableOpacity
