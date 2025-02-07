@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,6 +6,8 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  findNodeHandle
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -19,11 +21,14 @@ import {useCart} from '../../context/CartContext';
 const CompanyDetail = () => {
   const route = useRoute();
   const {companyId} = route.params;
+  const scrollViewRef = useRef(null);
+  const brandRefs = useRef({});
 
   const {addToCart, removeFromCart, cartItems} = useCart();
   const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [sections, setSections] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -38,11 +43,20 @@ const CompanyDetail = () => {
     }
   }, [userId]);
 
-  useEffect(() => {
-    if (selectedBrand && userId) {
-      fetchProducts(selectedBrand);
+  const scrollToBrand = brandId => {
+    setSelectedBrand(brandId);
+
+    const node = findNodeHandle(brandRefs.current[brandId]);
+    if (node && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({y: node - 50, animated: true});
     }
-  }, [selectedBrand, userId]);
+  };
+
+  // useEffect(() => {
+  //   if (selectedBrand && userId) {
+  //     fetchProducts(selectedBrand);
+  //   }
+  // }, [selectedBrand, userId]);
 
   const getUserId = async () => {
     try {
@@ -56,6 +70,38 @@ const CompanyDetail = () => {
     }
   };
 
+  const fetchCompanyData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `https://pos-api-dot-ancient-episode-256312.de.r.appspot.com/api/v1/company/companyProducts/${companyId}`,
+      );
+
+      if (!response.data.error) {
+        const brandsData = response.data.data.brands;
+        const sectionsData = brandsData.map(brand => ({
+          title: brand.name,
+          brandId: brand._id,
+          data: brand.products || [],
+        }));
+
+        setBrands(brandsData);
+        setSections(sectionsData);
+
+        // Extract wishlist products
+        setWishlist(
+          brandsData
+            .flatMap(brand => brand.products)
+            .map(product => (product.isLiked ? product._id : null))
+            .filter(Boolean),
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching company data:', error);
+    }
+    setLoading(false);
+  };
+
   const fetchBrands = async () => {
     try {
       const response = await axios.get(
@@ -64,6 +110,7 @@ const CompanyDetail = () => {
       if (!response.data.error && response.data.data.length > 0) {
         setBrands(response.data.data);
         setSelectedBrand(response.data.data[0]._id);
+        fetchCompanyData();
       }
     } catch (error) {
       console.error('Error fetching brands:', error);
@@ -118,96 +165,120 @@ const CompanyDetail = () => {
   return (
     <View style={styles.container}>
       <Header isBack={true} />
-
-      {/* 🔹 Brands List */}
-      <View style={{paddingHorizontal: 16}}>
-        <Txt weight={TxtWeight.Semi}  style={styles.heading}>
-          Select a Brand
-        </Txt>
-        <FlatList
-          data={brands}
-          horizontal
-          keyExtractor={item => item._id}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              style={[
-                styles.brandCard,
-                selectedBrand === item._id && styles.selectedBrandCard,
-              ]}
-              onPress={() => setSelectedBrand(item._id)}>
-              <Image source={{uri: item.brandLogo}} style={styles.brandImage} />
-              <Txt numberOfLines={1} style={styles.brandText}>
-                {item.name}
-              </Txt>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-
-      <View style={{paddingHorizontal: 16}}>
-        <Txt weight={TxtWeight.Semi} mt={20} style={styles.heading}>
-          Products
-        </Txt>
-        {loading ? (
-          <ActivityIndicator size="large" color={COLORS.theme} />
-        ) : (
+      <ScrollView>
+        {/* 🔹 Brands List */}
+        <View style={{paddingHorizontal: 16}}>
+          <Txt weight={TxtWeight.Semi} style={styles.heading}>
+            Select a Brand
+          </Txt>
           <FlatList
-            data={products}
-            numColumns={2}
+            data={brands}
+            horizontal
             keyExtractor={item => item._id}
-            columnWrapperStyle={styles.productRow}
-            renderItem={({item}) => {
-              const cartItem = cartItems.find(p => p._id === item._id);
-
-              return (
-                <View style={styles.productCard}>
-                  {/* Like/Unlike Icon */}
-                  <TouchableOpacity
-                    onPress={() => toggleWishlist(item._id)}
-                    style={styles.wishlistIcon}>
-                    <Ionicons
-                      name={
-                        wishlist.includes(item._id) ? 'heart' : 'heart-outline'
-                      }
-                      size={24}
-                      color="red"
-                    />
-                  </TouchableOpacity>
-
-                  <Image
-                    source={{uri: item.image}}
-                    style={styles.productImage}
-                  />
-                  <Txt style={styles.productName}>{item.name}</Txt>
-                  <Txt style={styles.productPrice}>
-                    Rs. <Txt weight={TxtWeight.Bold}>{item.salesPrice}</Txt>
-                  </Txt>
-
-                  {/* Add to Cart Button */}
-                  <View style={styles.quantityContainer}>
-                    <TouchableOpacity onPress={() => removeFromCart(item._id)}>
-                      <Ionicons
-                        name="minus-circle-outline"
-                        size={24}
-                        color="red"
-                      />
-                    </TouchableOpacity>
-                    <Txt weight={TxtWeight.Bold}>{cartItem?.quantity || 0}</Txt>
-                    <TouchableOpacity onPress={() => addToCart(item)}>
-                      <Ionicons
-                        name="plus-circle-outline"
-                        size={24}
-                        color="green"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            }}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={[
+                  styles.brandCard,
+                  selectedBrand === item._id && styles.selectedBrandCard,
+                ]}
+                onPress={() => scrollToBrand(item._id)}>
+                <Txt numberOfLines={1} style={styles.brandText}>
+                  {item.name}
+                </Txt>
+              </TouchableOpacity>
+            )}
           />
-        )}
-      </View>
+        </View>
+
+        <View style={{paddingHorizontal: 16}}>
+          <Txt weight={TxtWeight.Semi} mt={20} style={styles.heading}>
+            Products
+          </Txt>
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.theme} />
+          ) : (
+            <View>
+              {sections?.map(section => {
+                return (
+                  <View
+                    key={section.brandId}
+                    ref={ref => (brandRefs.current[section.brandId] = ref)}>
+                    <Txt weight={TxtWeight.Bold} mb={10}>
+                      {section.title}
+                    </Txt>
+
+                    <FlatList
+                      data={section.data}
+                      numColumns={2}
+                      keyExtractor={item => item._id}
+                      columnWrapperStyle={styles.productRow}
+                      renderItem={({item}) => {
+                        const cartItem = cartItems.find(
+                          p => p._id === item._id,
+                        );
+
+                        return (
+                          <View style={styles.productCard}>
+                            {/* Like/Unlike Icon */}
+                            <TouchableOpacity
+                              onPress={() => toggleWishlist(item._id)}
+                              style={styles.wishlistIcon}>
+                              <Ionicons
+                                name={
+                                  wishlist.includes(item._id)
+                                    ? 'heart'
+                                    : 'heart-outline'
+                                }
+                                size={24}
+                                color="red"
+                              />
+                            </TouchableOpacity>
+
+                            <Image
+                              source={{uri: item.image}}
+                              style={styles.productImage}
+                            />
+                            <Txt style={styles.productName}>{item.name}</Txt>
+                            <Txt style={styles.productPrice}>
+                              Rs.{' '}
+                              <Txt weight={TxtWeight.Bold}>
+                                {item.salesPrice}
+                              </Txt>
+                            </Txt>
+
+                            {/* Add to Cart Button */}
+                            <View style={styles.quantityContainer}>
+                              <TouchableOpacity
+                                onPress={() => removeFromCart(item._id)}>
+                                <Ionicons
+                                  name="minus-circle-outline"
+                                  size={24}
+                                  color="red"
+                                />
+                              </TouchableOpacity>
+                              <Txt weight={TxtWeight.Bold}>
+                                {cartItem?.quantity || 0}
+                              </Txt>
+                              <TouchableOpacity onPress={() => addToCart(item)}>
+                                <Ionicons
+                                  name="plus-circle-outline"
+                                  size={24}
+                                  color="green"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        );
+                      }}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      </ScrollView>
 
       {/* 🔹 Products List */}
     </View>
