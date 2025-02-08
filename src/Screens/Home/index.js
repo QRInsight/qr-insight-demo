@@ -1,30 +1,50 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
   Image,
   Dimensions,
-  FlatList,
   Modal,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import {COLORS, Space, TxtWeight, fetchHomeScreenData} from '../../Constants';
+import { COLORS, Space, TxtWeight, fetchHomeScreenData } from '../../Constants';
 import Container from '../../components/Container';
-import {images} from '../../assets';
+import { images } from '../../assets';
 import Txt from '../../components/Txt';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const Card = ({
-  title = 'Asset Detail',
-  onPress,
-  image = images.asset_detail,
-}) => {
+// Utility function to group projects by Name
+const groupProjectsByName = (projectsObj) => {
+  if (!projectsObj) return [];
+
+  const groupedMap = {};
+
+  Object.values(projectsObj).forEach((proj) => {
+    const { Name, Group, Qty } = proj;
+    const quantity = parseInt(Qty, 10) || 0;
+
+    if (!groupedMap[Name]) {
+      groupedMap[Name] = {
+        name: Name,
+        totalQty: 0,
+        groups: [], // each group entry => { group, qty }
+      };
+    }
+
+    groupedMap[Name].totalQty += quantity;
+    groupedMap[Name].groups.push({
+      group: Group,
+      qty: quantity,
+    });
+  });
+
+  return Object.values(groupedMap);
+};
+
+const Card = ({ title = 'Asset Detail', onPress, image = images.asset_detail }) => {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      style={styles.cardContainer}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.cardContainer}>
       <View style={styles.cardIconWrapper}>
         <Image source={image} style={styles.cardIcon} />
       </View>
@@ -33,14 +53,12 @@ const Card = ({
   );
 };
 
-const AssetCategoryTable = ({data}) => {
+// Category table remains the same
+const AssetCategoryTable = ({ data }) => {
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeaderRow}>
-        <Txt
-          size={14}
-          weight={TxtWeight.Regular}
-          style={[styles.tableHeader, {flex: 2}]}>
+        <Txt size={14} weight={TxtWeight.Regular} style={[styles.tableHeader, { flex: 2 }]}>
           Asset Categories
         </Txt>
         <Txt size={14} weight={TxtWeight.Regular} style={styles.tableHeader}>
@@ -49,59 +67,46 @@ const AssetCategoryTable = ({data}) => {
       </View>
       {data &&
         data?.['Groups'] &&
-        Object.entries(data?.['Groups']).map(
-          (
-            [category, quantity],
-            index, // Use Object.entries for key-value pairs
-          ) => {
-            const cleanedCategory = category.startsWith('Fixed Assets - ')
-              ? category.substring('Fixed Assets - '.length)
-              : category;
+        Object.entries(data?.['Groups']).map(([category, quantity], index) => {
+          const cleanedCategory = category.startsWith('Fixed Assets - ')
+            ? category.substring('Fixed Assets - '.length)
+            : category;
 
-            return (
-              <View key={index} style={styles.tableRow}>
-                <Txt style={[styles.tableCell, {flex: 2}]}>
-                  {cleanedCategory}
-                </Txt>
-                <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
-                  {quantity}
-                </Txt>
-              </View>
-            );
-          },
-        )}
+          return (
+            <View key={index} style={styles.tableRow}>
+              <Txt style={[styles.tableCell, { flex: 2 }]}>{cleanedCategory}</Txt>
+              <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{quantity}</Txt>
+            </View>
+          );
+        })}
     </View>
   );
 };
 
-const AssetProjectTable = ({data, onRowPress}) => {
+// Project table now uses grouped data
+const AssetProjectTable = ({ data, onRowPress }) => {
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeaderRow}>
-        <Txt
-          size={14}
-          weight={TxtWeight.Regular}
-          style={[styles.tableHeader, {flex: 2}]}>
-          Name
+        <Txt size={14} weight={TxtWeight.Regular} style={[styles.tableHeader, { flex: 2 }]}>
+          Project Name
         </Txt>
         <Txt size={14} weight={TxtWeight.Regular} style={styles.tableHeader}>
-          Quantity
+          Total Qty
         </Txt>
       </View>
-      {data &&
-        data['Projects'] &&
-        Object.values(data['Projects']).map((project, index) => (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            key={index}
-            style={styles.tableRow}
-            onPress={() => onRowPress(project)}>
-            <Txt style={[styles.tableCell, {flex: 2}]}>{project.Name}</Txt>
-            <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
-              {project.Qty}
-            </Txt>
-          </TouchableOpacity>
-        ))}
+
+      {data.map((project, index) => (
+        <TouchableOpacity
+          activeOpacity={0.9}
+          key={index}
+          style={styles.tableRow}
+          onPress={() => onRowPress(project)}
+        >
+          <Txt style={[styles.tableCell, { flex: 2 }]}>{project.name}</Txt>
+          <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{project.totalQty}</Txt>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
@@ -109,6 +114,7 @@ const AssetProjectTable = ({data, onRowPress}) => {
 const Home = () => {
   const navigation = useNavigation();
   const [assetsByCategory, setAssetsByCategory] = useState({});
+  const [groupedProjects, setGroupedProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -119,54 +125,53 @@ const Home = () => {
   const getInfo = async () => {
     const info = await fetchHomeScreenData();
     if (info.logs) {
-      setAssetsByCategory(JSON.parse(info.logs[0]));
+      const parsed = JSON.parse(info.logs[0]);
+      setAssetsByCategory(parsed);
+
+      // Group the projects by Name and store them
+      const grouped = groupProjectsByName(parsed.Projects);
+      setGroupedProjects(grouped);
     }
   };
 
+  // Count total assets from Groups
   const totalAssets =
     (assetsByCategory.Groups &&
       Object.values(assetsByCategory.Groups).reduce(
-        (sum, quantity) => sum + parseInt(quantity, 10), // Parse to integer
-        0,
+        (sum, quantity) => sum + parseInt(quantity, 10),
+        0
       )) ||
     0;
 
-  const handleRowPress = project => {
+  // When a table row is tapped
+  const handleRowPress = (project) => {
     setSelectedProject(project);
     setModalVisible(true);
   };
 
+  // Render the modal content for the selected project
   const renderProjectDetails = () => {
     if (!selectedProject) return null;
-
-    const projectGroup = selectedProject.Group || 'Unknown Group';
-    const relatedCategories =
-      assetsByCategory.Groups &&
-      Object.entries(assetsByCategory.Groups).filter(([key]) =>
-        key.includes(projectGroup),
-      );
-
-    console.log('selectedProject=>', selectedProject);
-    console.log('selectedProject=>', Object.values(selectedProject));
-    console.log('Group=>', selectedProject?.['Group']);
 
     return (
       <View style={styles.modalContent}>
         <Txt weight={TxtWeight.Bold} size={20} mb={15}>
-          {selectedProject.Name} - Details
+          {selectedProject.name} - Detailed Groups
         </Txt>
-        {/* {relatedCategories && relatedCategories.length > 0 ? (
-          Object.values(selectedProject?.Groups).map((data, index) => (
+
+        {selectedProject.groups.map((item, index) => {
+          // Strip out the 'Fixed Assets - ' prefix if it exists
+          const cleanedGroup = item.group.startsWith('Fixed Assets - ')
+            ? item.group.substring('Fixed Assets - '.length)
+            : item.group;
+
+          return (
             <View key={index} style={styles.tableRow}>
-              <Txt style={[styles.tableCell, {flex: 2}]}>{data?.Group}</Txt>
-              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
-                {data?.Qty}
-              </Txt>
+              <Txt style={[styles.tableCell, { flex: 2 }]}>{cleanedGroup}</Txt>
+              <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{item.qty}</Txt>
             </View>
-          ))
-        ) : (
-          <Txt>No categories available for this project.</Txt>
-        )} */}
+          );
+        })}
       </View>
     );
   };
@@ -174,10 +179,7 @@ const Home = () => {
   return (
     <Container showBottom={false}>
       <View style={styles.cardRow}>
-        <Card
-          title="Asset Detail"
-          onPress={() => navigation.navigate('AssetDetail')}
-        />
+        <Card title="Asset Detail" onPress={() => navigation.navigate('AssetDetail')} />
         <Card title="Asset Report" image={images.asset_report} />
       </View>
       <View style={styles.cardRow}>
@@ -205,42 +207,37 @@ const Home = () => {
       <Txt weight={TxtWeight.Semi} center size={18} mb={15} mt={10}>
         Asset Categories
       </Txt>
-
       <AssetCategoryTable title="Asset Categories" data={assetsByCategory} />
 
       <View style={styles.totalView}>
         <Txt color={COLORS.white} size={20} center>
-          Total Project |{'  '}
+          Total Projects |{'  '}
           <Txt weight={TxtWeight.Bold} color={COLORS.white} size={25}>
-            {assetsByCategory && assetsByCategory['Projects']
-              ? Object.values(assetsByCategory['Projects']).length
-              : ''}
+            {groupedProjects.length} {/* Distinct projects by Name */}
           </Txt>
         </Txt>
       </View>
 
-      <AssetProjectTable
-        title="Total Projects"
-        data={assetsByCategory}
-        onRowPress={handleRowPress}
-      />
+      {/* Render the grouped projects */}
+      <AssetProjectTable data={groupedProjects} onRowPress={handleRowPress} />
 
-      {/* Modal for Project Details */}
-      {/* <Modal
+      {/* Bottom Modal for Project Details */}
+      <Modal
         animationType="slide"
+        transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(false)}
+      >
         <View style={styles.modalWrapper}>
           <View style={styles.modalContainer}>
             <ScrollView>{renderProjectDetails()}</ScrollView>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}>
-              <Txt>Close</Txt>
+
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Txt style={{ color: COLORS.white }}>Close</Txt>
             </TouchableOpacity>
           </View>
         </View>
-      </Modal> */}
+      </Modal>
     </Container>
   );
 };
@@ -256,10 +253,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 1,
-      height: 1,
-    },
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 2,
@@ -301,7 +295,6 @@ const styles = StyleSheet.create({
   tableHeader: {
     flex: 1,
     textAlign: 'center',
-    verticalAlign: 'middle',
   },
   tableRow: {
     flexDirection: 'row',
@@ -324,5 +317,27 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 6,
     marginVertical: 15,
+  },
+  modalWrapper: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    padding: 20,
+    maxHeight: '60%',
+  },
+  modalContent: {
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: COLORS.theme,
+    borderRadius: 6,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
