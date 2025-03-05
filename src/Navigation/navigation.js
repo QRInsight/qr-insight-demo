@@ -13,6 +13,7 @@ import Home from '../Screens/Home';
 import AssetDetail from '../Screens/AssetDetail';
 import AssetVerify from '../Screens/AssetVerify';
 import AssetTransfer from '../Screens/AssetTransfer';
+import AssetReports from '../Screens/AssetReport';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +50,7 @@ function Navigator() {
         <Stack.Screen name="AssetDetail" component={AssetDetail} />
         <Stack.Screen name="AssetTransfer" component={AssetTransfer} />
         <Stack.Screen name="AssetVerify" component={AssetVerify} />
+        <Stack.Screen name="AssetReports" component={AssetReports} />
         <Stack.Screen name="ChooseScanType" component={ChooseScanType} />
         <Stack.Screen name="DeviceInput" component={DeviceInput} />
         <Stack.Screen name="Scanner" component={Scanner} />

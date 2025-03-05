@@ -3,6 +3,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
+    <queries>
+            <intent>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:mimeType="application/pdf" />
+            </intent>
+    </queries>
+
 
     <application
       android:name=".MainApplication"
@@ -12,6 +23,18 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
+     <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <!-- Ensure other apps (PDF viewers, file managers) can open PDF files -->
+      
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

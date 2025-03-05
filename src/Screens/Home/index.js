@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,20 +8,20 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { COLORS, Space, TxtWeight, fetchHomeScreenData } from '../../Constants';
+import {COLORS, Space, TxtWeight, fetchHomeScreenData} from '../../Constants';
 import Container from '../../components/Container';
-import { images } from '../../assets';
+import {images} from '../../assets';
 import Txt from '../../components/Txt';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 // Utility function to group projects by Name
-const groupProjectsByName = (projectsObj) => {
+const groupProjectsByName = projectsObj => {
   if (!projectsObj) return [];
 
   const groupedMap = {};
 
-  Object.values(projectsObj).forEach((proj) => {
-    const { Name, Group, Qty } = proj;
+  Object.values(projectsObj).forEach(proj => {
+    const {Name, Group, Qty} = proj;
     const quantity = parseInt(Qty, 10) || 0;
 
     if (!groupedMap[Name]) {
@@ -42,9 +42,16 @@ const groupProjectsByName = (projectsObj) => {
   return Object.values(groupedMap);
 };
 
-const Card = ({ title = 'Asset Detail', onPress, image = images.asset_detail }) => {
+const Card = ({
+  title = 'Asset Detail',
+  onPress,
+  image = images.asset_detail,
+}) => {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.cardContainer}>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={styles.cardContainer}>
       <View style={styles.cardIconWrapper}>
         <Image source={image} style={styles.cardIcon} />
       </View>
@@ -54,11 +61,14 @@ const Card = ({ title = 'Asset Detail', onPress, image = images.asset_detail }) 
 };
 
 // Category table remains the same
-const AssetCategoryTable = ({ data }) => {
+const AssetCategoryTable = ({data}) => {
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeaderRow}>
-        <Txt size={14} weight={TxtWeight.Regular} style={[styles.tableHeader, { flex: 2 }]}>
+        <Txt
+          size={14}
+          weight={TxtWeight.Regular}
+          style={[styles.tableHeader, {flex: 2}]}>
           Asset Categories
         </Txt>
         <Txt size={14} weight={TxtWeight.Regular} style={styles.tableHeader}>
@@ -74,8 +84,10 @@ const AssetCategoryTable = ({ data }) => {
 
           return (
             <View key={index} style={styles.tableRow}>
-              <Txt style={[styles.tableCell, { flex: 2 }]}>{cleanedCategory}</Txt>
-              <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{quantity}</Txt>
+              <Txt style={[styles.tableCell, {flex: 2}]}>{cleanedCategory}</Txt>
+              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+                {quantity}
+              </Txt>
             </View>
           );
         })}
@@ -84,11 +96,14 @@ const AssetCategoryTable = ({ data }) => {
 };
 
 // Project table now uses grouped data
-const AssetProjectTable = ({ data, onRowPress }) => {
+const AssetProjectTable = ({data, onRowPress}) => {
   return (
     <View style={styles.tableContainer}>
       <View style={styles.tableHeaderRow}>
-        <Txt size={14} weight={TxtWeight.Regular} style={[styles.tableHeader, { flex: 2 }]}>
+        <Txt
+          size={14}
+          weight={TxtWeight.Regular}
+          style={[styles.tableHeader, {flex: 2}]}>
           Project Name
         </Txt>
         <Txt size={14} weight={TxtWeight.Regular} style={styles.tableHeader}>
@@ -101,10 +116,11 @@ const AssetProjectTable = ({ data, onRowPress }) => {
           activeOpacity={0.9}
           key={index}
           style={styles.tableRow}
-          onPress={() => onRowPress(project)}
-        >
-          <Txt style={[styles.tableCell, { flex: 2 }]}>{project.name}</Txt>
-          <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{project.totalQty}</Txt>
+          onPress={() => onRowPress(project)}>
+          <Txt style={[styles.tableCell, {flex: 2}]}>{project.name}</Txt>
+          <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+            {project.totalQty}
+          </Txt>
         </TouchableOpacity>
       ))}
     </View>
@@ -139,12 +155,12 @@ const Home = () => {
     (assetsByCategory.Groups &&
       Object.values(assetsByCategory.Groups).reduce(
         (sum, quantity) => sum + parseInt(quantity, 10),
-        0
+        0,
       )) ||
     0;
 
   // When a table row is tapped
-  const handleRowPress = (project) => {
+  const handleRowPress = project => {
     setSelectedProject(project);
     setModalVisible(true);
   };
@@ -167,8 +183,10 @@ const Home = () => {
 
           return (
             <View key={index} style={styles.tableRow}>
-              <Txt style={[styles.tableCell, { flex: 2 }]}>{cleanedGroup}</Txt>
-              <Txt style={[styles.tableCell, { textAlign: 'center' }]}>{item.qty}</Txt>
+              <Txt style={[styles.tableCell, {flex: 2}]}>{cleanedGroup}</Txt>
+              <Txt style={[styles.tableCell, {textAlign: 'center'}]}>
+                {item.qty}
+              </Txt>
             </View>
           );
         })}
@@ -179,8 +197,15 @@ const Home = () => {
   return (
     <Container showBottom={false}>
       <View style={styles.cardRow}>
-        <Card title="Asset Detail" onPress={() => navigation.navigate('AssetDetail')} />
-        <Card title="Asset Report" image={images.asset_report} />
+        <Card
+          title="Asset Detail"
+          onPress={() => navigation.navigate('AssetDetail')}
+        />
+        <Card
+          title="Asset Report"
+          onPress={() => navigation.navigate('AssetReports')}
+          image={images.asset_report}
+        />
       </View>
       <View style={styles.cardRow}>
         <Card
@@ -226,14 +251,15 @@ const Home = () => {
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalWrapper}>
           <View style={styles.modalContainer}>
             <ScrollView>{renderProjectDetails()}</ScrollView>
 
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Txt style={{ color: COLORS.white }}>Close</Txt>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}>
+              <Txt style={{color: COLORS.white}}>Close</Txt>
             </TouchableOpacity>
           </View>
         </View>
@@ -253,7 +279,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 1, height: 1 },
+    shadowOffset: {width: 1, height: 1},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 2,

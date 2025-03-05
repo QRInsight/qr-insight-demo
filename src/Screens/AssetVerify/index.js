@@ -100,38 +100,50 @@ const AssetVerify = () => {
   };
 
   const auditChosenItem = async () => {
+    if (!assetNumber) return;
+
     try {
       setLoading(true);
-      const auditItem = auditItems.find(
-        data =>
-          data?.A_Asset_ID &&
-          data?.A_Asset_ID?.identifier?.includes(assetNumber.toString()),
-      )?.id;
-      if (!auditItem)
-        return Toast.show({
-          position: 'bottom',
-          type: 'error',
-          text1: 'Project ID not found.',
-        });
-      const updated = await updateProjectLine(auditItem, {Status: true});
-      if (!updated)
-        return Toast.show({
-          position: 'bottom',
-          type: 'error',
-          text1: 'Project ID not found.',
-        });
-      Toast.show({
-        position: 'bottom',
-        type: 'success',
-        text1: 'Product Found Successfully.',
-      });
-      await fetchAuditItems(selectedProject);
+      const auditItemIndex = auditItems.findIndex(
+        (data) => data?.A_Asset_ID?.identifier?.includes(assetNumber.toString())
+      );
+
+      if (auditItemIndex === -1) {
+        Toast.show({ position: 'bottom', type: 'error', text1: 'Asset Not Found.' });
+        return;
+      }
+
+      const auditItem = auditItems[auditItemIndex];
+
+      if (auditItem.Status) {
+        Toast.show({ position: 'bottom', type: 'info', text1: 'Asset Already Verified.' });
+        return;
+      }
+
+      const updated = await updateProjectLine(auditItem.id, { Status: true });
+
+      if (!updated) {
+        Toast.show({ position: 'bottom', type: 'error', text1: 'Error updating asset status.' });
+        return;
+      }
+
+      // Move the scanned item to the top without fetching again
+      const updatedAuditItems = [...auditItems];
+      updatedAuditItems[auditItemIndex].Status = true;
+      const scannedItem = updatedAuditItems.splice(auditItemIndex, 1)[0];
+      updatedAuditItems.unshift(scannedItem);
+
+      setAuditItems(updatedAuditItems);
+
+      Toast.show({ position: 'bottom', type: 'success', text1: 'Asset Verified Successfully.' });
+
     } catch (error) {
-      console.error('Error on the front fetching audit items:', error);
+      console.error('Error updating audit item:', error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const toggleCamera = () => {
     setIsCameraVisible(prevState => !prevState);

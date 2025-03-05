@@ -2,6 +2,7 @@ import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob';
 import {addKeyToStorage, getValueFromStorage} from '../helpers/asyncStorage';
 import Toast from 'react-native-toast-message';
+import {Alert} from 'react-native';
 
 export const COLORS = {
   bgGrey: '#F2F2F2',
@@ -262,7 +263,7 @@ export const updateProjectLine = async (lineId, updatedData) => {
     if (result) {
       console.log('result==>', result);
       return result; // Return the updated result
-    } 
+    }
     // else {
     //   console.log('result==>', result);
     //   throw new Error('Error updating project line');
@@ -283,4 +284,76 @@ export const updateProjectLine = async (lineId, updatedData) => {
     // console.error('Error updating project line:', error.message);
     throw error;
   }
+};
+
+const fetchReport = async (endpoint, body) => {
+  try {
+    const authToken = await getValueFromStorage('token');
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${protocol}://${host}:${port}`;
+    const url = `${baseUrl}${endpoint}`;
+
+    console.log('Fetching Report from:', url);
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'POST',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      JSON.stringify(body),
+    );
+
+    const result = await response.json();
+
+    if (result?.isError) {
+      throw new Error(result?.summary || 'Error generating report');
+    }
+
+    console.log('Report Fetched Successfully:', result);
+    return result;
+  } catch (error) {
+    console.error('Report Fetch Error:', error);
+    Alert.alert('Error', error.message);
+    return null;
+  }
+};
+
+// Fetch Fixed Asset Register Report
+export const fetchFixedAssetRegisterReport = async () => {
+  return fetchReport('/api/v1/processes/api_fa_register', {
+    AD_Client_ID: 1000002,
+    AD_Org_ID: 1000020,
+    StartDate: '2024-01-01',
+    EndDate: '2024-06-30',
+  });
+};
+
+// Fetch Fixed Asset Receiving Report
+export const fetchFixedAssetReceivingReport = async () => {
+  return fetchReport('/api/v1/processes/api_fa_receivingreport', {
+    AD_Client_ID: 1000002,
+    AD_Org_ID: 1000020,
+    StartDate: '2024-01-01',
+    EndDate: '2024-06-30',
+  });
+};
+
+// Fetch Asset Transfer Report
+export const fetchAssetTransferReport = async () => {
+  return fetchReport('/api/v1/processes/api_fa_transferreport', {
+    StartDate: '2024-01-01',
+    EndDate: '2024-06-30',
+  });
+};
+
+// Fetch Asset Summary Report
+export const fetchAssetSummaryReport = async () => {
+  return fetchReport('/api/v1/processes/api_fa_summaryreport', {
+    AD_Client_ID: 1000002,
+  });
 };
