@@ -14,6 +14,7 @@ import AssetDetail from '../Screens/AssetDetail';
 import AssetVerify from '../Screens/AssetVerify';
 import AssetTransfer from '../Screens/AssetTransfer';
 import AssetReports from '../Screens/AssetReport';
+import PDFViewerScreen from '../Screens/PdfViewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +56,8 @@ function Navigator() {
         <Stack.Screen name="DeviceInput" component={DeviceInput} />
         <Stack.Screen name="Scanner" component={Scanner} />
         <Stack.Screen name="Result" component={Result} />
+        <Stack.Screen name="PDFViewerScreen" component={PDFViewerScreen} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

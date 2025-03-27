@@ -327,9 +327,8 @@ const fetchReport = async (endpoint, body) => {
 export const fetchFixedAssetRegisterReport = async () => {
   return fetchReport('/api/v1/processes/api_fa_register', {
     AD_Client_ID: 1000002,
-    AD_Org_ID: 1000020,
-    StartDate: '2024-01-01',
-    EndDate: '2024-06-30',
+    StartDate: '2025-01-01',
+    EndDate: '2025-06-30',
   });
 };
 
@@ -337,17 +336,16 @@ export const fetchFixedAssetRegisterReport = async () => {
 export const fetchFixedAssetReceivingReport = async () => {
   return fetchReport('/api/v1/processes/api_fa_receivingreport', {
     AD_Client_ID: 1000002,
-    AD_Org_ID: 1000020,
-    StartDate: '2024-01-01',
-    EndDate: '2024-06-30',
+    StartDate: '2025-01-01',
+    EndDate: '2025-06-30',
   });
 };
 
 // Fetch Asset Transfer Report
 export const fetchAssetTransferReport = async () => {
   return fetchReport('/api/v1/processes/api_fa_transferreport', {
-    StartDate: '2024-01-01',
-    EndDate: '2024-06-30',
+    StartDate: '2025-01-01',
+    EndDate: '2025-06-30',
   });
 };
 

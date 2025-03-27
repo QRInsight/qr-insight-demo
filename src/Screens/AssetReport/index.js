@@ -87,35 +87,26 @@ const AssetReports = () => {
       Alert.alert('Error', 'Failed to open the PDF.');
     }
   };
-
   const handleReportDownload = async (fetchReportFunction, reportName) => {
     setLoading(true);
     console.log('Downloading report:', reportName);
 
-    const hasPermission = await requestStoragePermission();
-    console.log('Storage Permission Granted:', hasPermission);
-
-    if (!hasPermission) {
-      setLoading(false);
-      Alert.alert('Permission Denied', 'Cannot save PDF without permission.');
-      return;
-    }
-
     try {
-      const report = await fetchReportFunction();
+      const report = await fetchReportFunction(); // Fetch Report Data
       console.log('Report Data:', report ? 'Received' : 'Not Received');
 
-      if (!report) {
+      if (!report || !report.exportFile) {
         Alert.alert('Error', `Failed to fetch ${reportName}`);
         return;
       }
 
-      await downloadAndOpenPDF(report, `${reportName}.pdf`);
+      // Navigate to PDF Viewer Screen with Base64 data
+      navigation.navigate('PDFViewerScreen', {base64Data: report.exportFile});
     } catch (error) {
       console.error(`Error fetching ${reportName}:`, error);
       Alert.alert('Error', `Failed to download ${reportName}`);
     } finally {
-      setLoading(false); // Ensure loading is disabled
+      setLoading(false);
     }
   };
 
