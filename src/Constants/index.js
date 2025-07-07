@@ -286,6 +286,55 @@ export const updateProjectLine = async (lineId, updatedData) => {
   }
 };
 
+// TRANSFER ASSET REPORT
+export const updateAssetTransferReport = async data => {
+  try {
+    console.log('data=>', data);
+    const authToken = await getValueFromStorage('token'); // Get token from storage
+    const protocol = await getValueFromStorage('protocol');
+    const host = await getValueFromStorage('host');
+    const port = await getValueFromStorage('port');
+    const baseUrl = `${protocol}://${host}:${port}`;
+    const url = `${baseUrl}/api/v1/processes/api_assettransfer`;
+
+    const response = await RNFetchBlob.config({trusty: true}).fetch(
+      'POST',
+      url,
+      {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      JSON.stringify(data),
+    );
+
+    const result = await response.json();
+    if (result) {
+      console.log('tranfer result==>', result);
+      return result; // Return the updated result
+    }
+    // else {
+    //   console.log('result==>', result);
+    //   throw new Error('Error updating project line');
+    // }
+  } catch (error) {
+    console.log('error=>', error);
+    const errorTitle = error?.title || 'Update Failed';
+    const errorDetail =
+      error?.detail || 'An error occurred while updating the project line.';
+
+    // Show Toast with fallback values
+    Toast.show({
+      type: 'error',
+      text1: error.message,
+      position: 'bottom',
+    });
+
+    // console.error('Error updating project line:', error.message);
+    throw error;
+  }
+};
+
 const fetchReport = async (endpoint, body) => {
   try {
     const authToken = await getValueFromStorage('token');

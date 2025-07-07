@@ -14,8 +14,6 @@ import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 
-const notIclude = ['Attribute Set Instance', 'Organization', 'Asset Addition'];
-
 const sequence = [
   'C_Project_ID', // Project
   'M_Warehouse_ID', // Warehouse
@@ -23,14 +21,14 @@ const sequence = [
   'InventoryNo', // Asset Code
   'Name', // Asset Name
   'Description', // Asset Description
+  'AD_Client_ID', // Tenant
   'A_Asset_Group_ID', // Asset Group
   'Locationdescription', // Asset Location
-  'EmployeeName', // Employee Name (assume key exists or handle dynamically)
-  'Department', // Department (assume key exists or handle dynamically)
+  'ER_Employee_ID', // Employee Name (assume key exists or handle dynamically)
+  'ER_Department_ID', // Department (assume key exists or handle dynamically)
   'RepairableStautus', // Serviceable Status
   'CreatedBy', // Created By
   'UpdatedBy', // Updated By
-  'AD_Client_ID', // Tenant
 ];
 
 const AssetDetail = () => {
@@ -60,6 +58,8 @@ const AssetDetail = () => {
       setLoading(false);
     }
   };
+
+  console.log('assetData=>', Object.keys(assetData || {}));
 
   return (
     <Container onBack={() => navigation.goBack()} title="Asset Detail">
@@ -118,7 +118,7 @@ const AssetDetail = () => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                      {key || '-'}
+                      {key == 'Locationdescription' ? "Remarks" : key || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>

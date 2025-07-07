@@ -7,7 +7,12 @@ import {
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {COLORS, TxtWeight, fetchAssetDetailsById} from '../../Constants';
+import {
+  COLORS,
+  TxtWeight,
+  fetchAssetDetailsById,
+  updateAssetTransferReport,
+} from '../../Constants';
 import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Input} from '../../components/TxtInput';
@@ -87,10 +92,10 @@ const AssetTransfer = ({route}) => {
     fetchDropdownData,
     loading: dropdownLoading,
   } = useContext(DropdownContext);
-  console.log('dropdownData=>', dropdownData);
   const [assetData, setAssetData] = useState(null); // State to store API data
   const [loading, setLoading] = useState(false); // Loading state
   const [assetNumber, setAssetNumber] = useState(''); // Input value for asset number
+  const [transferLoading, setTransferLoading] = useState(false); // Input value for asset number
   // const [dropdownData, setDropdownData] = useState({}); // Data for dropdowns
   const [selectedValues, setSelectedValues] = useState({}); // Selected values
   const [isDataFetched, setIsDataFetched] = useState(false); // Track if data is fetched
@@ -172,7 +177,6 @@ const AssetTransfer = ({route}) => {
     }
 
     setLoading(true);
-    console.log('Fetching starts====>');
     try {
       const data = await fetchAssetDetailsById(assetNumber); // Call the API function
       setAssetData(data); // Set the fetched asset data
@@ -180,6 +184,32 @@ const AssetTransfer = ({route}) => {
       Alert.alert('Error', error.message || 'Failed to fetch asset details.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOnAssetTransfer = async () => {
+    // Logic to handle asset transfer
+
+    try {
+      const obj = {
+        a_asset_id: assetData.id.toString(),
+      };
+      if (selectedValues['To Warehouse'])
+        obj.M_WAREHOUSE_ID = selectedValues['To Warehouse'].toString();
+      if (selectedValues['To Department'])
+        obj.M_DEPARTMENT_ID = selectedValues['To Warehouse'].toString();
+      if (selectedValues['To Employee'])
+        obj.M_EMPLOYEE_ID = selectedValues['To Employee'].toString();
+      if (selectedValues['To Project'])
+        obj.M_PROJECT_ID = selectedValues['To Project'].toString();
+      if (selectedValues['To Locator'])
+        obj.M_LOCATER_ID = selectedValues['To Locator'].toString();
+      setTransferLoading(true);
+      await updateAssetTransferReport(obj);
+      setTransferLoading(false);
+    } catch (err) {
+      console.log(err);
+      setTransferLoading(false);
     }
   };
 
@@ -241,7 +271,7 @@ const AssetTransfer = ({route}) => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                      {key || '-'}
+                    {key == 'Locationdescription' ? "Remarks" : key || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>
@@ -262,7 +292,6 @@ const AssetTransfer = ({route}) => {
       {/* Dropdowns for APIs */}
       {assetData
         ? apiEndpoints.map((endpoint, index) => {
-            console.log('endpoint.fromKey==>', endpoint.fromKey);
             return (
               <View
                 key={endpoint.fromLabel}
@@ -324,10 +353,11 @@ const AssetTransfer = ({route}) => {
 
       {assetData ? (
         <Btn
+          loading={transferLoading}
           style={{
             marginVertical: 14,
-          }}>
-          {' '}
+          }}
+          onPress={handleOnAssetTransfer}>
           Transfer Asset{' '}
         </Btn>
       ) : null}

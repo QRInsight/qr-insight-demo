@@ -8,6 +8,7 @@ import {
   Text,
   Platform,
   PermissionsAndroid,
+  FlatList,
 } from 'react-native';
 import {
   Camera,
@@ -52,7 +53,7 @@ const AssetVerify = () => {
         if (scannedValue) {
           setAssetNumber(scannedValue); // Update asset number
           setIsCameraVisible(false); // Hide camera after scanning
-          auditChosenItem();
+          auditChosenItem(scannedValue);
         }
       }
     },
@@ -99,31 +100,44 @@ const AssetVerify = () => {
     }
   };
 
-  const auditChosenItem = async () => {
+  const auditChosenItem = async an => {
+    let assetNumber = an || assetNumber;
     if (!assetNumber) return;
 
     try {
       setLoading(true);
-      const auditItemIndex = auditItems.findIndex(
-        (data) => data?.A_Asset_ID?.identifier?.includes(assetNumber.toString())
+      const auditItemIndex = auditItems.findIndex(data =>
+        data?.A_Asset_ID?.identifier?.includes(assetNumber.toString()),
       );
 
       if (auditItemIndex === -1) {
-        Toast.show({ position: 'bottom', type: 'error', text1: 'Asset Not Found.' });
+        Toast.show({
+          position: 'bottom',
+          type: 'error',
+          text1: 'Asset Not Found.',
+        });
         return;
       }
 
       const auditItem = auditItems[auditItemIndex];
 
       if (auditItem.Status) {
-        Toast.show({ position: 'bottom', type: 'info', text1: 'Asset Already Verified.' });
+        Toast.show({
+          position: 'bottom',
+          type: 'info',
+          text1: 'Asset Already Verified.',
+        });
         return;
       }
 
-      const updated = await updateProjectLine(auditItem.id, { Status: true });
+      const updated = await updateProjectLine(auditItem.id, {Status: true});
 
       if (!updated) {
-        Toast.show({ position: 'bottom', type: 'error', text1: 'Error updating asset status.' });
+        Toast.show({
+          position: 'bottom',
+          type: 'error',
+          text1: 'Error updating asset status.',
+        });
         return;
       }
 
@@ -132,18 +146,19 @@ const AssetVerify = () => {
       updatedAuditItems[auditItemIndex].Status = true;
       const scannedItem = updatedAuditItems.splice(auditItemIndex, 1)[0];
       updatedAuditItems.unshift(scannedItem);
-
       setAuditItems(updatedAuditItems);
 
-      Toast.show({ position: 'bottom', type: 'success', text1: 'Asset Verified Successfully.' });
-
+      Toast.show({
+        position: 'bottom',
+        type: 'success',
+        text1: 'Asset Verified Successfully.',
+      });
     } catch (error) {
       console.error('Error updating audit item:', error);
     } finally {
       setLoading(false);
     }
   };
-
 
   const toggleCamera = () => {
     setIsCameraVisible(prevState => !prevState);
@@ -169,7 +184,7 @@ const AssetVerify = () => {
           containerSyle={styles.inputContainer}
           onEndEditing={event => {
             setAssetNumber(event.nativeEvent.text);
-            auditChosenItem();
+            auditChosenItem(event.nativeEvent.text);
           }}
         />
         <TouchableOpacity style={styles.cameraButton} onPress={toggleCamera}>
@@ -241,29 +256,37 @@ const AssetVerify = () => {
       <View style={styles.tableContainer}>
         {loading ? (
           <ActivityIndicator size="large" color={COLORS.theme} />
-        ) : (
-          [
+        ) : null}
+
+        <FlatList
+          data={[
             ...auditItems.filter(data => data.Status == true),
             ...auditItems.filter(data => data.Status == false),
-          ].map((item, index) => (
-            <View key={index} style={styles.row}>
-              <Txt style={styles.txt}>
-                {item?.A_Asset_ID?.identifier?.split('_')[0] ||
-                  item?.A_Asset_ID?.id ||
-                  'N/A'}
-              </Txt>
-              <Txt
-                size={12}
-                style={[styles.txt, {flex: 2.4, paddingRight: 10}]}>
-                {item?.A_Asset_ID?.identifier || 'N/A'}
-              </Txt>
-              <Image
-                source={item.Status ? images.right : images.wrong}
-                style={styles.statusIcon}
-              />
-            </View>
-          ))
-        )}
+          ]}
+          keyExtractor={(item, index) =>
+            item?.A_Asset_ID?.id.toString() || index.toString()
+          }
+          renderItem={({item, index}) => {
+            return (
+              <View key={index} style={styles.row}>
+                <Txt size={14} style={styles.txt}>
+                  {item?.A_Asset_ID?.identifier?.split('_')[0] ||
+                    item?.A_Asset_ID?.id ||
+                    'N/A'}
+                </Txt>
+                <Txt
+                  size={12}
+                  style={[styles.txt, {flex: 2.4, paddingRight: 10}]}>
+                  {item?.A_Asset_ID?.identifier || 'N/A'}
+                </Txt>
+                <Image
+                  source={item.Status ? images.right : images.wrong}
+                  style={styles.statusIcon}
+                />
+              </View>
+            );
+          }}
+        />
       </View>
     </Container>
   );
