@@ -15,17 +15,18 @@ import {Input} from '../../components/TxtInput';
 import Container from '../../components/Container';
 
 const sequence = [
+  'AD_Client_ID', // Tenant
   'C_Project_ID', // Project
   'M_Warehouse_ID', // Warehouse
   'M_Locator_ID', // Locator
   'InventoryNo', // Asset Code
+  'A_Asset_Group_ID', // Asset Group
   'Name', // Asset Name
   'Description', // Asset Description
-  'AD_Client_ID', // Tenant
-  'A_Asset_Group_ID', // Asset Group
-  'Locationdescription', // Asset Location
   'ER_Employee_ID', // Employee Name (assume key exists or handle dynamically)
   'ER_Department_ID', // Department (assume key exists or handle dynamically)
+  'ER_AssetLocator_ID',
+  'Locationdescription', // Asset Location
   'RepairableStautus', // Serviceable Status
   'CreatedBy', // Created By
   'UpdatedBy', // Updated By
@@ -105,7 +106,8 @@ const AssetDetail = () => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                      {assetData[key]?.propertyLabel || '-'}
+                      {assetData[key]?.propertyLabel  == "ER_Employee" ? "Employee" : 
+                      assetData[key]?.propertyLabel || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>
@@ -118,7 +120,9 @@ const AssetDetail = () => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                      {key == 'Locationdescription' ? "Remarks" : key || '-'}
+                      {key == 'Locationdescription' ? "Remarks" :
+                      key == "InventoryNo" ? "Asset Code" :
+                        key || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>

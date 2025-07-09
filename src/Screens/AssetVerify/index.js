@@ -269,11 +269,26 @@ const AssetVerify = () => {
           renderItem={({item, index}) => {
             return (
               <View key={index} style={styles.row}>
-                <Txt size={14} style={styles.txt}>
-                  {item?.A_Asset_ID?.identifier?.split('_')[0] ||
-                    item?.A_Asset_ID?.id ||
-                    'N/A'}
-                </Txt>
+                <TouchableOpacity
+                  activeOpacity={0.1}
+                  onPress={() => {
+                    if (
+                      item?.A_Asset_ID?.identifier?.split('_')[0] ||
+                      item?.A_Asset_ID?.id
+                    ) {
+                      navigation.navigate('AssetDetail', {
+                        assetNumber:
+                          item?.A_Asset_ID?.identifier?.split('_')[0] ||
+                          item?.A_Asset_ID?.id,
+                      });
+                    }
+                  }}>
+                  <Txt size={14} style={styles.txt}>
+                    {item?.A_Asset_ID?.identifier?.split('_')[0] ||
+                      item?.A_Asset_ID?.id ||
+                      'N/A'}
+                  </Txt>
+                </TouchableOpacity>
                 <Txt
                   size={12}
                   style={[styles.txt, {flex: 2.4, paddingRight: 10}]}>

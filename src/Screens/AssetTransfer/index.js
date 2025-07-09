@@ -39,18 +39,21 @@ const notIclude = [
 ];
 
 const sequence = [
+  'AD_Client_ID', // Tenant
   'C_Project_ID', // Project
+  'M_Warehouse_ID', // Warehouse
+  'M_Locator_ID', // Locator
+  'ER_AssetLocator_ID',
   'InventoryNo', // Asset Code
+  'A_Asset_Group_ID', // Asset Group
   'Name', // Asset Name
   'Description', // Asset Description
-  'A_Asset_Group_ID', // Asset Group
+  'ER_Employee_ID', // Employee Name (assume key exists or handle dynamically)
+  'ER_Department_ID', // Department (assume key exists or handle dynamically)
   'Locationdescription', // Asset Location
-  'EmployeeName', // Employee Name (assume key exists or handle dynamically)
-  'Department', // Department (assume key exists or handle dynamically)
   'RepairableStautus', // Serviceable Status
   'CreatedBy', // Created By
   'UpdatedBy', // Updated By
-  'AD_Client_ID', // Tenant
 ];
 
 const apiEndpoints = [
@@ -258,7 +261,8 @@ const AssetTransfer = ({route}) => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                      {assetData[key]?.propertyLabel || '-'}
+                      {assetData[key]?.propertyLabel  == "ER_Employee" ? "Employee" : 
+                      assetData[key]?.propertyLabel || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>
@@ -271,7 +275,10 @@ const AssetTransfer = ({route}) => {
                 <View key={index} style={styles.row}>
                   <View style={styles.labelContainer}>
                     <Txt mt={3} color="#000" weight={TxtWeight.Light}>
-                    {key == 'Locationdescription' ? "Remarks" : key || '-'}
+                    {key == 'Locationdescription' ? "Remarks" :
+                      key == "InventoryNo" ? "Asset Code"  :
+                      key == "ER_Employee" ? "Employee" :
+                      key || '-'}
                     </Txt>
                   </View>
                   <View style={styles.valueContainer}>

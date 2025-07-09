@@ -60,7 +60,6 @@ export async function authenticateUser(username, password) {
   const port = await getValueFromStorage('port');
   const host = await getValueFromStorage('host');
   const baseUrl = `${protocol}://${host}:${port}`;
-  console.log('baseUrl==>', baseUrl);
 
   const requestBody = JSON.stringify({
     userName: username,

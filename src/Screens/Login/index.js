@@ -15,9 +15,6 @@ import {images} from '../../assets';
 import Txt from '../../components/Txt';
 import {Btn} from '../../components/Btn';
 
-const HEIGHT = Dimensions.get('screen').height;
-const WIDTH = Dimensions.get('screen').width;
-
 const Login = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState('SuperUser');
